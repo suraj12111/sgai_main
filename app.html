@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGAI — Render Engine v3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,700&display=swap" rel="stylesheet">
+
+  <!-- ── SPLIT CSS ─────────────────────────── -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/modules.css">
+  <link rel="stylesheet" href="css/video_workflow.css">
+  <script src="https://accounts.google.com/gsi/client" onload="initGoogleSignIn()" async defer></script>
+  <!-- 3D Interactive Model Viewer -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     LEFT SIDEBAR
+═══════════════════════════════════════════ -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-mark" style="background: transparent;">
+      <img src="logo.png" alt="SketchUpGurus Logo" style="width: 100%; height: 100%; object-fit: contain;">
+    </div>
+    <div class="logo-text">
+      <h1>SGAI</h1>
+      <p>RENDER.ENGINE.V3</p>
+    </div>
+  </div>
+
+  <div class="sidebar-content">
+
+    <!-- ── STUDIO TAB ─────────────────────── -->
+    <div id="tab-studio" class="tab-content active">
+      <div class="control-group">
+        <p class="group-title">1. Base Geometry</p>
+        <!-- Capture button: calls SketchUp Ruby bridge only -->
+        <button class="upload-capture-btn" onclick="captureViewport()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Capture Viewport
+        </button>
+
+        <div class="divider-text">— or upload manually —</div>
+
+        <!-- Upload zone: opens file picker — completely separate from Capture -->
+        <div class="upload-zone" id="upload-zone-main" onclick="document.getElementById('base-upload').click()">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span class="upload-label" id="dz-text-1">Upload Base Image</span>
+          <span class="upload-sub" id="dz-text-2">Click here — JPG, PNG, WEBP</span>
+          <img id="dz-preview" style="display:none;" class="base-preview">
+        </div>
+        <!-- Hidden file input — only triggered by Upload zone, never by Capture button -->
+        <input type="file" id="base-upload" hidden accept="image/*">
+      </div>
+
+      <div class="control-group">
+        <p class="group-title">2. Visual References</p>
+        <div class="input-group">
+          <label class="field-label">Style Reference</label>
+          <button class="ref-add-btn" onclick="document.getElementById('style-input').click()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Style Image
+          </button>
+          <input type="file" id="style-input" hidden accept="image/*">
+          <div id="style-preview-container" style="display:none; margin-top:8px; position:relative;">
+            <img id="style-preview" style="width:100%; border:1px solid rgba(255,255,255,0.08); border-radius:6px;">
+            <button onclick="clearStyle()" class="prop-remove-btn" style="width:20px; height:20px; font-size:12px;">&times;</button>
+          </div>
+        </div>
+        <div class="input-group" style="margin-bottom:0;">
+          <label class="field-label">Prop Injector</label>
+          <button class="ref-add-btn" onclick="document.getElementById('prop-input').click()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Transparent PNG
+          </button>
+          <input type="file" id="prop-input" hidden multiple accept="image/*">
+          <div id="prop-preview-container" class="prop-gallery"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── HISTORY TAB ─────────────────────── -->
+    <div id="tab-history" class="tab-content">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border-color); flex-shrink:0;">
+        <span style="font-family:var(--font-mono); font-size:10px; font-weight:700; letter-spacing:1.5px; color:var(--text-muted); text-transform:uppercase;">Render History</span>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <span id="history-count-badge" style="font-family:var(--font-mono); font-size:9px; color:var(--accent-primary);"></span>
+          <button onclick="loadHistoryUI()" style="background:transparent; border:1px solid var(--border-color); color:var(--text-muted); border-radius:5px; padding:3px 9px; font-family:var(--font-mono); font-size:9px; cursor:pointer;">&#8635; Refresh</button>
+          <button onclick="clearAllHistory()" style="background:transparent; border:1px solid rgba(255,79,112,0.25); color:rgba(255,79,112,0.6); border-radius:5px; padding:3px 9px; font-family:var(--font-mono); font-size:9px; cursor:pointer;">Clear All</button>
+        </div>
+      </div>
+      <div id="history-container" style="flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px;">
+        <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-muted); text-align:center; padding:24px;">No renders yet.</div>
+      </div>
+    </div>
+
+    <!-- ── SUPPORT TAB ─────────────────────── -->
+    <div id="tab-support" class="tab-content">
+      <div class="control-group" style="text-align:center; padding:24px 16px;">
+        <div style="font-family:var(--font-mono); font-size:11px; color:#fff; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Contact Support</div>
+        <p style="color:var(--text-muted); font-size:12px; line-height:1.6; margin-bottom:20px;">Need help with renders, billing, or have a feature request?</p>
+        <a href="mailto:sg@sketchupgurus.co.in?subject=SketchupGurus AI Support Request" target="_blank"
+           style="display:inline-block; padding:11px 22px; background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.2); color:var(--accent-primary); border-radius:8px; font-family:var(--font-mono); font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; text-decoration:none;">
+          Email Support Team
+        </a>
+      </div>
+    </div>
+
+    <!-- ── VIDEO TAB (Commented Out) ────────────────
+    <div id="tab-video" class="tab-content">
+      <div class="control-group" style="padding: 14px;">
+        <div style="font-family:var(--font-mono); font-size:11px; color:#fff; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">AI Video Builder</div>
+        <p style="color:var(--text-muted); font-size:10.5px; line-height:1.5; margin-bottom:14px;">
+          Create stunning cinematic videos using a node-based workflow canvas. Connect a starting image node to a video generator node.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="ref-add-btn" style="border-color:rgba(16,185,129,0.3); color:#10b981; background:rgba(16,185,129,0.04);" onclick="videoWorkflowAddNode('image')">
+            + Add Image Node
+          </button>
+          <button class="ref-add-btn" style="border-color:rgba(217,70,239,0.3); color:#d946ef; background:rgba(217,70,239,0.04);" onclick="videoWorkflowAddNode('video')">
+            + Add Video Node
+          </button>
+          <div style="border-top:1px solid rgba(255,255,255,0.05); margin:8px 0;"></div>
+          <button class="upload-capture-btn" style="background:rgba(255,79,112,0.08); border-color:rgba(255,79,112,0.2); color:#ff4f70;" onclick="resetWorkflowCanvas()">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Reset Workspace
+          </button>
+        </div>
+      </div>
+      <div class="control-group" style="padding:14px; border-top:1px solid rgba(255,255,255,0.04);">
+        <p class="group-title">Active Graph Links</p>
+        <div id="video-connections-list" style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); display:flex; flex-direction:column; gap:4px; max-height:160px; overflow-y:auto;">
+          No active links.
+        </div>
+      </div>
+    </div>
+    -->
+
+    <!-- ── 3D TAB ─────────────────────────── -->
+    <div id="tab-3d" class="tab-content">
+      <div class="control-group">
+        <p class="group-title">3D Asset Guide</p>
+        <div class="i3d-guide-list">
+          <div class="i3d-guide-item">
+            <div class="i3d-guide-num">01</div>
+            <div class="i3d-guide-text">
+              <strong>Contrast Background</strong>
+              <span>Use solid or transparent backgrounds for cleaner shapes.</span>
+            </div>
+          </div>
+          <div class="i3d-guide-item">
+            <div class="i3d-guide-num">02</div>
+            <div class="i3d-guide-text">
+              <strong>Uncropped Subject</strong>
+              <span>Ensure the entire object is visible and inside the frame.</span>
+            </div>
+          </div>
+          <div class="i3d-guide-item">
+            <div class="i3d-guide-num">03</div>
+            <div class="i3d-guide-text">
+              <strong>Lighting & Focus</strong>
+              <span>Avoid blurry details, heavy shadows, or strong reflections.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Collapsible Server Settings -->
+      <details style="margin-top: 14px; font-size: 11px;">
+        <summary style="cursor: pointer; color: var(--text-muted); font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; list-style: none; display: flex; align-items: center; gap: 6px; user-select: none;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Server Settings
+        </summary>
+        <div style="margin-top: 8px; border: 1px solid rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 6px; background: rgba(0,0,0,0.2);">
+          <div class="i3d-server-row">
+            <input class="i3d-server-input" type="text" id="i3d-server-url" value="http://localhost:3000" placeholder="http://localhost:3000" style="font-size: 10px; padding: 4px 6px;">
+            <button class="i3d-ping-btn" onclick="i3dPingServer()" style="font-size: 10px; padding: 4px 8px;">Ping</button>
+          </div>
+          <div class="i3d-server-pill" style="margin-top: 6px; justify-content: flex-start;"><div class="i3d-server-dot" id="i3d-server-dot"></div><span id="i3d-server-txt" style="font-size: 8px;">Not checked</span></div>
+        </div>
+      </details>
+    </div>
+
+
+
+  </div><!-- /.sidebar-content -->
+
+  <!-- ── USER CARD ───────────────────────── -->
+  <div class="sidebar-user">
+    <div id="user-info-area">
+      <button class="auth-btn" onclick="document.getElementById('auth-modal').style.display='flex'">Authenticate</button>
+    </div>
+  </div>
+</div><!-- /.sidebar -->
+
+
+<!-- ═══════════════════════════════════════════
+     MAIN AREA
+═══════════════════════════════════════════ -->
+<div class="main-area">
+  <div class="main-header">
+    <nav class="top-nav">
+      <button class="nav-btn active" id="tab-btn-studio" data-tab="studio" onclick="switchTab('studio')" data-i18n="tab_studio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Studio
+      </button>
+      <button class="nav-btn" id="tab-btn-history" data-tab="history" onclick="switchTab('history')" data-i18n="tab_projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        Projects
+      </button>
+      <button class="nav-btn" id="tab-btn-support" data-tab="support" onclick="switchTab('support')" data-i18n="tab_support">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Support
+      </button>
+      <button class="nav-btn" id="tab-btn-3d" data-tab="3d" onclick="switchTab('3d')" data-i18n="tab_3d">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Image to 3D
+      </button>
+      <!--
+      <button class="nav-btn" id="tab-btn-video" data-tab="video" onclick="switchTab('video')" data-i18n="tab_video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        Studio Video
+      </button>
+      -->
+    </nav>
+
+    <div class="header-actions">
+      <!-- Language Selector -->
+      <div class="lang-selector-container">
+        <select id="lang-selector" class="lang-select" onchange="switchLanguage(this.value)" title="Select Language">
+          <option value="en">EN</option>
+          <option value="es">ES</option>
+          <option value="de">DE</option>
+          <option value="ja">JA</option>
+        </select>
+      </div>
+      <div class="header-user-info">
+        <span id="user-email-display" onclick="showProfileModal()" title="View Profile"></span>
+        <span id="credit-counter">CONNECTING...</span>
+      </div>
+      <button class="btn-buy" onclick="showPaywall()" data-i18n="btn_buy_credits">Buy Credits</button>
+      <button class="btn-secondary" style="padding:7px 12px; margin:0; width:auto;" onclick="logoutUser()" data-i18n="btn_logout">Logout</button>
+    </div>
+  </div>
+
+  <!-- Studio Output -->
+  <div id="main-studio">
+    <!-- Presets Gallery -->
+    <div class="presets-gallery-container">
+      <div class="presets-gallery-header" style="justify-content: space-between; display: flex; align-items: center; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="presets-icon"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <span>Presets Gallery</span>
+        </div>
+        <div class="preset-filter-pills">
+          <button class="preset-filter-pill active" onclick="filterPresets('layouts')" id="pill-filter-layouts">Layouts</button>
+          <button class="preset-filter-pill" onclick="filterPresets('styles')" id="pill-filter-styles">Aesthetics</button>
+        </div>
+      </div>
+      <div class="presets-cards" id="presets-cards-container">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </div>
+
+    <div id="status">Awaiting Model Data...</div>
+    <div id="results-container"></div>
+  </div>
+
+  <!-- Video Canvas (Commented Out)
+  <div id="main-video-canvas" class="tab-content">
+    <div class="canvas-container" id="video-canvas-container">
+      <svg class="canvas-svg" id="video-canvas-svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.3)"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <div class="video-workspace-sidebar" style="position:absolute; right:0; top:0; bottom:0; z-index:100; width:320px; background:rgba(10,12,18,0.75); backdrop-filter:blur(30px); border-left:1px solid rgba(255,255,255,0.06); padding:20px; overflow-y:auto; scrollbar-width:thin; box-sizing:border-box; display:flex; flex-direction:column; gap:14px;">
+      <div style="font-family:var(--font-mono); font-size:10px; font-weight:700; color:rgba(217,70,239,0.9); text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(217,70,239,0.15); padding-bottom:10px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        <span data-i18n="video_settings_title">Video Settings</span>
+      </div>
+
+      <div>
+        <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;" data-i18n="vsource_header">Image Source</div>
+        <div class="vid-src-tabs">
+          <div class="vid-src-tab active" id="vsrc-tab-capture" onclick="vidSrcSwitch('capture')" data-i18n="vsrc_capture">Capture</div>
+          <div class="vid-src-tab" id="vsrc-tab-upload" onclick="vidSrcSwitch('upload')" data-i18n="vsrc_upload">Upload</div>
+          <div class="vid-src-tab" id="vsrc-tab-history" onclick="vidSrcSwitch('history')" data-i18n="vsrc_history">History</div>
+        </div>
+        <div id="vsrc-upload-area" style="display:none; margin-top:8px;">
+          <div class="vid-upload-zone" onclick="document.getElementById('vid-img-file').click()">
+            <span style="font-family:var(--font-mono); font-size:9px; color:#6b8aaa;" id="vid-upload-lbl" data-i18n="vsrc_upload_label">Click to upload image</span>
+          </div>
+          <input type="file" id="vid-img-file" hidden accept=".jpg,.jpeg,.png,.webp" onchange="vidHandleUpload(event)">
+          <div id="vid-upload-preview" class="vid-img-preview" style="display:none; margin-top:6px;">
+            <img id="vid-upload-img" src="" alt=""><button class="vid-img-preview-clear" onclick="vidClearUpload()">x</button>
+          </div>
+        </div>
+        <div id="vsrc-history-area" style="display:none; margin-top:8px;">
+          <div class="vid-hist-grid" id="vid-hist-grid"></div>
+          <div id="vid-hist-selected-wrap" style="display:none; margin-top:6px;">
+            <div class="vid-img-preview"><img id="vid-hist-selected-img" src="" alt=""><button class="vid-img-preview-clear" onclick="vidClearHistoryPick()">x</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+        <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Ending Image (Interpolation - Optional)</div>
+        <div class="vid-src-tabs">
+          <div class="vid-src-tab active" id="vsrc-end-tab-none" onclick="vidEndSrcSwitch('none')">None</div>
+          <div class="vid-src-tab" id="vsrc-end-tab-upload" onclick="vidEndSrcSwitch('upload')">Upload</div>
+          <div class="vid-src-tab" id="vsrc-end-tab-history" onclick="vidEndSrcSwitch('history')">History</div>
+        </div>
+        <div id="vsrc-end-upload-area" style="display:none; margin-top:8px;">
+          <div class="vid-upload-zone" onclick="document.getElementById('vid-end-img-file').click()">
+            <span style="font-family:var(--font-mono); font-size:9px; color:#6b8aaa;" id="vid-end-upload-lbl">Click to upload end image</span>
+          </div>
+          <input type="file" id="vid-end-img-file" hidden accept=".jpg,.jpeg,.png,.webp" onchange="vidHandleEndFrameUpload(event)">
+          <div id="vid-end-upload-preview" class="vid-img-preview" style="display:none; margin-top:6px;">
+            <img id="vid-end-upload-img" src="" alt=""><button class="vid-img-preview-clear" onclick="vidClearEndFrame()">x</button>
+          </div>
+        </div>
+        <div id="vsrc-end-history-area" style="display:none; margin-top:8px;">
+          <div class="vid-end-hist-grid" id="vid-end-hist-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; max-height:220px; overflow-y:auto;"></div>
+          <div id="vid-end-hist-selected-wrap" style="display:none; margin-top:6px;">
+            <div class="vid-img-preview"><img id="vid-end-hist-selected-img" src="" alt=""><button class="vid-img-preview-clear" onclick="vidClearEndHistoryPick()">x</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Camera Motion</div>
+        <div class="cam-grid">
+          <div class="cam-pill selected" onclick="vidSelectCam(this,'none')">Static</div>
+          <div class="cam-pill" onclick="vidSelectCam(this,'dolly_forward')">Dolly In</div>
+          <div class="cam-pill" onclick="vidSelectCam(this,'dolly_backward')">Dolly Out</div>
+          <div class="cam-pill" onclick="vidSelectCam(this,'pan_left')">Pan Left</div>
+          <div class="cam-pill" onclick="vidSelectCam(this,'pan_right')">Pan Right</div>
+          <div class="cam-pill" onclick="vidSelectCam(this,'tilt_up')">Tilt Up</div>
+          <div class="cam-pill" onclick="vidSelectCam(this,'tilt_down')">Tilt Down</div>
+          <div class="cam-pill" onclick="vidSelectCam(this,'orbit_left')">Orbit L</div>
+          <div class="cam-pill" onclick="vidSelectCam(this,'orbit_right')">Orbit R</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Aspect Ratio</div>
+        <div class="vid-ar-pills" style="display:flex; gap:6px;">
+          <div class="vid-ar-pill selected" onclick="vidSelectAR(this,'16:9')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">16:9</div>
+          <div class="vid-ar-pill" onclick="vidSelectAR(this,'9:16')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">9:16</div>
+          <div class="vid-ar-pill" onclick="vidSelectAR(this,'1:1')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">1:1</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Motion Speed</div>
+        <div class="vid-speed-pills" style="display:flex; gap:6px;">
+          <div class="vid-speed-pill" onclick="vidSelectSpeed(this,'low')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">Low</div>
+          <div class="vid-speed-pill selected" onclick="vidSelectSpeed(this,'medium')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">Medium</div>
+          <div class="vid-speed-pill" onclick="vidSelectSpeed(this,'high')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">High</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Duration</div>
+        <div class="vid-dur-pills">
+          <div class="vid-dur-pill" onclick="vidSelectDur(this,4)">4 sec</div>
+          <div class="vid-dur-pill selected" onclick="vidSelectDur(this,6)">6 sec</div>
+          <div class="vid-dur-pill" onclick="vidSelectDur(this,8)">8 sec</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Resolution</div>
+        <div class="vid-res-pills">
+          <div class="vid-res-pill selected" onclick="vidSelectRes(this,'720p')">720p</div>
+          <div class="vid-res-pill" onclick="vidSelectRes(this,'1080p')">1080p</div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(217,70,239,0.03); border:1px solid rgba(217,70,239,0.1); border-radius:6px; padding:8px 10px;">
+        <div style="display:flex; flex-direction:column; gap:2px;">
+          <span style="font-family:var(--font-mono); font-size:9px; font-weight:700; color:var(--text-main); text-transform:uppercase;">AI Sound Effects</span>
+          <span style="font-size:7px; color:var(--text-muted);">Generate ambient Veo soundscapes</span>
+        </div>
+        <label class="switch" style="position:relative; display:inline-block; width:28px; height:16px;">
+          <input type="checkbox" id="vid-generate-audio" style="opacity:0; width:0; height:0;">
+          <span class="slider round" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:rgba(255,255,255,0.1); transition:.4s; border-radius:34px;"></span>
+        </label>
+      </div>
+
+      <div>
+        <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;" data-i18n="vpreset_header">Cinematic Motion Presets</div>
+        <div class="video-presets-gallery" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; scrollbar-width:thin;">
+          <div class="video-preset-card" data-id="drone" onclick="selectVideoPreset('drone')" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_drone.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
+            <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);"></div>
+            <span style="position:absolute; bottom:6px; left:6px; font-family:var(--font-mono); font-size:8px; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.8);" data-i18n="vpreset_drone">Drone Orbit</span>
+          </div>
+          <div class="video-preset-card" data-id="timelapse" onclick="selectVideoPreset('timelapse')" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_timelapse.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
+            <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);"></div>
+            <span style="position:absolute; bottom:6px; left:6px; font-family:var(--font-mono); font-size:8px; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.8);" data-i18n="vpreset_timelapse">Timelapse Sunset</span>
+          </div>
+          <div class="video-preset-card" data-id="walkthrough" onclick="selectVideoPreset('walkthrough')" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_walkthrough.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
+            <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);"></div>
+            <span style="position:absolute; bottom:6px; left:6px; font-family:var(--font-mono); font-size:8px; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.8);" data-i18n="vpreset_walkthrough">Walkthrough</span>
+          </div>
+          <div class="video-preset-card" data-id="dolly" onclick="selectVideoPreset('dolly')" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_dolly.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
+            <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);"></div>
+            <span style="position:absolute; bottom:6px; left:6px; font-family:var(--font-mono); font-size:8px; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.8);" data-i18n="vpreset_dolly">Dolly In</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;" data-i18n="vprompt_label">Motion Prompt (optional)</div>
+        <textarea id="vid-motion-prompt" placeholder="e.g. slow cinematic flythrough, warm light..." style="width:100%; background:var(--input-bg); border:1px solid rgba(217,70,239,0.2); border-radius:6px; color:var(--text-main); padding:8px 10px; font-family:var(--font-mono); font-size:10px; resize:vertical; outline:none; min-height:52px; margin-bottom:10px;" data-i18n="vprompt_label"></textarea>
+      </div>
+
+      <button id="btn-video-run-trigger" onclick="startVideoRender()" style="width:100%; padding:12px; border:none; border-radius:8px; cursor:pointer; font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#fff; background:linear-gradient(135deg,rgba(217,70,239,0.9),rgba(162,28,175,0.95)); box-shadow:0 4px 18px rgba(217,70,239,0.35); transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px;">
+        <span data-i18n="btn_video_run">Run Video Render</span> (10 CR)
+      </button>
+    </div>
+  </div>
+  -->
+
+
+
+  <!-- 3D Generator Output -->
+  <div id="main-3d">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid var(--border-color);">
+      <div style="font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:2px; color:#e63329; text-transform:uppercase;">Image to 3D Generator</div>
+      <div class="i3d-credit-badge" style="margin-bottom:0;">Cost: <span id="i3d-cost-num">10</span> CR</div>
+    </div>
+
+
+
+    <!-- Hidden Select Elements for JS Compatibility -->
+    <select class="i3d-select" id="i3d-model" style="display:none;">
+      <option value="meshy-6">Engine 6</option>
+      <option value="meshy-5">Engine 5</option>
+    </select>
+    <select class="i3d-select" id="i3d-topology" style="display:none;">
+      <option value="quad">Quad</option>
+      <option value="triangle">Triangle</option>
+    </select>
+    <select class="i3d-select" id="i3d-polycount" style="display:none;">
+      <option value="30000">30k</option>
+      <option value="50000" selected>50k</option>
+      <option value="100000">100k</option>
+      <option value="200000">200k</option>
+    </select>
+    <select class="i3d-select" id="i3d-pose" style="display:none;">
+      <option value="">None</option>
+      <option value="a-pose">A-Pose</option>
+      <option value="t-pose">T-Pose</option>
+    </select>
+
+    <div class="i3d-workspace-grid">
+      <!-- Left Column: Source Upload & Previews -->
+      <div class="i3d-workspace-col">
+        <div class="control-group" style="background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.04); margin-bottom: 0;">
+          <p class="group-title" style="margin-bottom: 10px;">Select Source Image</p>
+          <div class="i3d-mode-pills" style="margin-bottom: 12px;">
+            <button class="i3d-mode-pill active" id="i3d-pill-single" onclick="i3dSwitchMode('single')">Single Image</button>
+            <button class="i3d-mode-pill" id="i3d-pill-multi" onclick="i3dSwitchMode('multi')">Multi-View (4 Angles)</button>
+          </div>
+          
+          <!-- Sticky Tip Info Box -->
+          <div class="i3d-upload-tip" style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px; background: rgba(0, 229, 255, 0.03); border: 1px solid rgba(0, 229, 255, 0.12); padding: 8px 12px; border-radius: 6px; font-family: var(--font-mono); font-size: 9px; line-height: 1.4; color: var(--accent-primary);">
+            <span style="font-size: 11px; flex-shrink: 0; line-height: 1;">💡</span>
+            <span>Best 3D model produced only if image is white background or transparent.</span>
+          </div>
+
+          <div id="i3d-single-wrap">
+            <div class="i3d-drop" id="i3d-dropzone" onclick="document.getElementById('i3d-file-single').click()" ondragover="i3dDragOver(event)" ondragleave="i3dDragLeave(event)" ondrop="i3dDrop(event)" style="min-height: 120px;">
+              <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 28px; height: 28px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span class="dz-label" id="i3d-dz-label" style="font-size: 10px;">Upload Image</span>
+              <span class="dz-sub" style="font-size: 8px;">JPG, PNG - Max 20MB</span>
+            </div>
+            
+            <input type="file" id="i3d-file-single" hidden accept=".jpg,.jpeg,.png" onchange="i3dHandleFile(event,'single')">
+            <div class="i3d-prev-wrap" id="i3d-prev-single" style="display:none; margin-top:12px; position:relative; overflow:hidden;">
+              <div class="i3d-image-preview-container">
+                <img id="i3d-prev-single-img" src="" alt="">
+              </div>
+              <button class="i3d-prev-clear" onclick="i3dClearSingle()">x</button>
+              <button class="i3d-remove-bg-btn" id="i3d-remove-bg-btn" onclick="i3dRemoveBackground()" style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); border:1px solid var(--accent-primary); color:var(--accent-primary); font-family:var(--font-mono); font-size:9px; padding:4px 8px; border-radius:4px; cursor:pointer; display:flex; align-items:center; gap:4px; z-index:10; white-space:nowrap; outline:none;">
+                <span>🧼</span> Remove BG (0.2 CR)
+              </button>
+            </div>
+          </div>
+          
+          <div id="i3d-multi-wrap" style="display:none;">
+            <p style="font-family:var(--font-mono); font-size:9px; color:#6b8aaa; margin-bottom:10px;">Upload up to 4 angles of the same object</p>
+            <div class="i3d-slots" id="i3d-slots"></div>
+            <input type="file" id="i3d-file-multi" hidden accept=".jpg,.jpeg,.png" onchange="i3dHandleFile(event,'multi')">
+          </div>
+        </div>
+
+        <!-- Result Area (Progress, 3D Model, Errors) inside Left Column! -->
+        <div id="i3d-result-area" style="margin-top:0px; display:none;">
+          <div class="i3d-progress-card" id="i3d-progress-card" style="display:none; margin-bottom: 0;">
+            <div class="i3d-progress-header"><div><div style="font-size:9px; color:#6b8aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Task ID</div><div class="i3d-task-id" id="i3d-task-id">-</div></div><span class="i3d-status-badge pending" id="i3d-status-badge">Pending</span></div>
+            <div class="i3d-progress-msg"><div class="i3d-pulse" id="i3d-pulse"></div><span id="i3d-progress-msg">Waiting in queue...</span></div>
+            <div class="i3d-bar-track"><div class="i3d-bar-fill" id="i3d-bar-fill" style="width:0%"></div></div>
+            <div class="i3d-bar-pct" id="i3d-bar-pct">0%</div>
+          </div>
+          <div class="i3d-model-card" id="i3d-model-card" style="display:none; margin-bottom: 0; position: relative;">
+            <div class="i3d-thumb" id="i3d-thumb"><div class="i3d-thumb-empty">No preview</div></div>
+            
+            <!-- Viewer Toolbar Overlay -->
+            <div id="i3d-viewer-toolbar" style="position: absolute; top: 12px; right: 12px; z-index: 100; display: none; gap: 6px; background: rgba(10, 14, 20, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 4px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+              <button onclick="i3dToggleViewerRotation()" class="i3d-ctrl-btn" title="Toggle Auto Rotation">
+                <span id="i3d-rotate-btn-icon">⏸</span> <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">Rotate</span>
+              </button>
+              <button onclick="i3dCycleViewerLighting()" class="i3d-ctrl-btn" title="Cycle Lighting">
+                <span id="i3d-light-btn-icon">☀️</span> <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">Light</span>
+              </button>
+              <button onclick="i3dResetViewerCamera()" class="i3d-ctrl-btn" title="Reset Camera">
+                <span id="i3d-reset-btn-icon">🎯</span> <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">Reset</span>
+              </button>
+              <button onclick="i3dToggleViewerWireframe()" class="i3d-ctrl-btn" title="Toggle Mesh Wireframe">
+                <span id="i3d-wireframe-btn-icon">🕸️</span> <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">Wireframe</span>
+              </button>
+            </div>
+            <div class="i3d-model-info">
+              <div class="i3d-model-title">Model Generated</div>
+              <div class="i3d-model-meta" id="i3d-model-meta">-</div>
+              <div class="i3d-dl-grid" id="i3d-dl-grid"></div>
+              <button class="i3d-skp-btn" id="i3d-skp-btn" onclick="i3dImportSKP()" disabled style="width: 100%;" data-i18n="btn_skp_import">Import GLB into SketchUp</button>
+              <div class="i3d-skp-status" id="i3d-skp-status"></div>
+            </div>
+          </div>
+          <div class="i3d-error" id="i3d-error-area" style="display:none;"><span>!</span><span id="i3d-error-txt">Error</span></div>
+        </div>
+      </div>
+
+      <!-- Right Column: Settings & Custom Controls -->
+      <div class="i3d-workspace-col">
+        <div class="control-group" style="background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.04); margin-bottom: 0;">
+          <p class="group-title" style="margin-bottom: 12px;">Model Parameters</p>
+          
+          <div class="i3d-controls-grid">
+            <div class="i3d-control-item">
+              <label class="field-label" style="font-size:9px; margin-bottom: 4px;">AI Model</label>
+              <div class="segmented-control">
+                <button type="button" class="segment-btn active" onclick="selectSegment('i3d-model', 'meshy-6', this)">Engine 6</button>
+                <button type="button" class="segment-btn" onclick="selectSegment('i3d-model', 'meshy-5', this)">Engine 5</button>
+              </div>
+            </div>
+            
+            <div class="i3d-control-item">
+              <label class="field-label" style="font-size:9px; margin-bottom: 4px;">Topology</label>
+              <div class="segmented-control">
+                <button type="button" class="segment-btn active" onclick="selectSegment('i3d-topology', 'quad', this)">Quad</button>
+                <button type="button" class="segment-btn" onclick="selectSegment('i3d-topology', 'triangle', this)">Triangle</button>
+              </div>
+            </div>
+            
+            <div class="i3d-control-item">
+              <label class="field-label" style="font-size:9px; margin-bottom: 4px;">Poly Count</label>
+              <div class="segmented-control">
+                <button type="button" class="segment-btn" onclick="selectSegment('i3d-polycount', '30000', this)">30k</button>
+                <button type="button" class="segment-btn active" onclick="selectSegment('i3d-polycount', '50000', this)">50k</button>
+                <button type="button" class="segment-btn" onclick="selectSegment('i3d-polycount', '100000', this)">100k</button>
+                <button type="button" class="segment-btn" onclick="selectSegment('i3d-polycount', '200000', this)">200k</button>
+              </div>
+            </div>
+            
+            <div class="i3d-control-item">
+              <label class="field-label" style="font-size:9px; margin-bottom: 4px;">Pose Preset</label>
+              <div class="segmented-control">
+                <button type="button" class="segment-btn active" onclick="selectSegment('i3d-pose', '', this)">None</button>
+                <button type="button" class="segment-btn" onclick="selectSegment('i3d-pose', 'a-pose', this)">A-Pose</button>
+                <button type="button" class="segment-btn" onclick="selectSegment('i3d-pose', 't-pose', this)">T-Pose</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top: 14px; margin-bottom: 12px; flex-wrap:wrap;">
+            <div class="i3d-toggle-row" style="flex:1; min-width:140px; padding:6px 10px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.04); border-radius:6px;"><div class="i3d-toggle-info"><strong>Textures</strong><span>+5 CR</span></div><button class="i3d-toggle on" id="i3d-tog-texture" onclick="i3dToggle('texture')"></button></div>
+            <div class="i3d-toggle-row" id="i3d-pbr-row" style="flex:1; min-width:140px; padding:6px 10px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.04); border-radius:6px;"><div class="i3d-toggle-info"><strong>PBR Maps</strong><span>+3 CR</span></div><button class="i3d-toggle on" id="i3d-tog-pbr" onclick="i3dToggle('pbr')"></button></div>
+            <div class="i3d-toggle-row" style="flex:1; min-width:140px; padding:6px 10px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.04); border-radius:6px;"><div class="i3d-toggle-info"><strong>Remesh</strong><span>Optimise</span></div><button class="i3d-toggle on" id="i3d-tog-remesh" onclick="i3dToggle('remesh')"></button></div>
+          </div>
+
+          <div id="i3d-prompt-wrap" style="margin-bottom:0;"><label class="field-label" style="font-size:9px; margin-bottom: 4px;">Texture Prompt (optional)</label><textarea id="i3d-tex-prompt" placeholder="e.g. worn leather, rusted metal..." style="width:100%; background:var(--input-bg); border:1px solid rgba(230,51,41,0.15); border-radius:6px; color:var(--text-main); padding:6px 10px; font-family:var(--font-mono); font-size:10px; resize:vertical; outline:none; min-height:46px;"></textarea></div>
+        </div>
+
+        <button class="i3d-generate-btn" id="i3d-gen-btn" onclick="i3dGenerate()" style="margin-top: 0px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          <span data-i18n="btn_3d_run">Generate 3D Model</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div><!-- /.main-area -->
+
+
+<!-- ═══════════════════════════════════════════
+     RIGHT SIDEBAR
+═══════════════════════════════════════════ -->
+<div class="right-sidebar">
+  <div class="right-sidebar-header">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14M7.76 7.76a6 6 0 0 0 0 8.48M16.24 7.76a6 6 0 0 1 0 8.48"/></svg>
+    <h2 data-i18n="sidebar_render_settings">Render Settings</h2>
+  </div>
+  <div class="right-sidebar-body">
+
+    <div class="control-group">
+      <p class="group-title">AI Engine Model</p>
+      <div class="input-group" style="margin-bottom:0;">
+        <select id="render-model" style="width:100%; background:var(--input-bg); border:1px solid rgba(255,255,255,0.08); border-radius:6px; color:var(--text-main); padding:8px 10px; outline:none; font-family:inherit; font-size:11px;">
+          <option value="gemini" selected>Google Gemini (Default)</option>
+          <option value="grok-imagine">Grok Imagine</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <p class="group-title">3. Design Parameters</p>
+
+      <div class="input-group">
+        <label class="field-label">Architectural Style</label>
+        <select id="architectural_style_select" class="sidebar-select">
+          <option value="High quality exterior architectural render, standard HD resolution, realistic lighting, architectural photography, detailed" selected>Exterior</option>
+          <option value="High quality interior design render, soft natural lighting, elegant styling, realistic materials, standard HD, interior design photography">Interior</option>
+          <option value="Top-down 3D architectural floor plan render, isometric view, dollhouse perspective, realistic lighting, soft shadows, clear room layout, photorealistic">Floor Plan</option>
+          <option value="Modern commercial interior render, office space, retail design, professional lighting, realistic, architectural visualization">Commercial</option>
+          <option value="Bird's-eye view, aerial architectural render, drone photography angle, masterplan view, realistic lighting, detailed landscape">Masterplan</option>
+          <option value="Exploded axonometric view, technical illustration, isometric projection, wireframe aesthetic">Exploded</option>
+          <option value="Professional interior design moodboard, architectural flat lay layout, carefully arranged material samples, cohesive color palette swatches, furniture inspiration vignettes, interior design presentation board, top-down photography, photorealistic textures, highly detailed">Moodboard</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <div class="prompt-header"><label class="field-label" style="margin-bottom:0;" data-i18n="label_design_prompt">Design Prompt</label></div>
+        <textarea id="prompt" placeholder="Describe specific details, colors, or moods (max 250 words)..." style="margin-top:7px;" data-i18n="label_design_prompt"></textarea>
+      </div>
+
+      <div class="input-group">
+        <label class="field-label">Negative Prompt</label>
+        <input type="text" id="negative-prompt" placeholder="What to avoid (e.g. people, cars, blur)...">
+      </div>
+
+      <div class="input-group">
+        <label class="field-label" data-i18n="label_environment">Time of Day &amp; Lighting</label>
+        <select id="environment_preset_select" class="sidebar-select">
+          <option value="Clear sky, bright daylight, sharp shadows">☀️ Morning</option>
+          <option value="Evening twilight, dusk lighting, warm artificial lights">🌇 Evening</option>
+          <option value="Night time, dark sky, dramatic artificial lighting, illuminated windows">🌙 Night</option>
+          <option value="Ambient lighting, soft cinematic atmospheric lighting">☁️ Ambient</option>
+          <option value="Snowy environment, winter landscape, soft diffused winter light">❄️ Snow</option>
+          <option value="Overcast sky, cloudy day, soft diffused lighting, moody atmosphere, wet puddles with reflections, no harsh shadows">🌥️ Overcast</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label class="field-label" data-i18n="label_backdrop">Surrounding Backdrop</label>
+        <select id="backdrop_preset_select" class="sidebar-select">
+          <option value="" selected>Original</option>
+          <option value="Lush tropical jungle backdrop, dense palm trees, exotic ferns, humid misty forest canopy.">🌴 Jungle</option>
+          <option value="Rural forest background, pine trees, rustic woodland landscape, mossy grounds, tall conifers.">🌲 Forest</option>
+          <option value="Modern metropolitan city background, distant highrise skyscrapers, urban architecture skyline, hazy horizon.">🏙️ Urban</option>
+          <option value="Majestic mountain range backdrop, alpine peaks, rugged stone peaks, clear vistas, remote wilderness.">⛰️ Mountain</option>
+          <option value="Coastal seaside background, sandy beach dunes, ocean horizon view, coastal grasses.">🏖️ Coastal</option>
+          <option value="Quiet suburban residential neighborhood background, green manicured lawn gardens, neat streetscapes.">🏡 Suburban</option>
+        </select>
+      </div>
+
+      <div class="input-group" style="margin-bottom:0;">
+        <label class="field-label" data-i18n="label_materials">Material Override</label>
+        <select id="material_preset_select" class="sidebar-select">
+          <option value="" selected>Original</option>
+          <option value="Marble textures and premium marble finishes">Marble</option>
+          <option value="Wood textures and finishes">Wood</option>
+          <option value="Ceramic tile surfaces and flooring">Tile</option>
+          <option value="Plush carpet flooring, soft textures">Carpet</option>
+          <option value="Exposed concrete, industrial concrete finish">Concrete</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <p class="group-title">4. AI Freedom</p>
+      <div class="input-group" style="margin-bottom:0;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+          <label class="field-label" style="margin-bottom:0;">Geometry Lock</label>
+          <span id="geometry-lock-val" style="font-size:9px; color:var(--accent-gold); font-weight:700; font-family:var(--font-mono);">STRICT</span>
+        </div>
+        <input type="range" id="geometry-lock" min="0" max="100" value="0" oninput="
+          const val = this.value;
+          const label = document.getElementById('geometry-lock-val');
+          if(val < 33) { label.innerText = 'STRICT'; label.style.color = 'var(--accent-gold)'; }
+          else if(val < 66) { label.innerText = 'BALANCED'; label.style.color = 'var(--accent-primary)'; }
+          else { label.innerText = 'CREATIVE'; label.style.color = 'var(--accent-green)'; }
+        ">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <p class="group-title">5. Render Quality</p>
+      <div class="input-group" style="margin-bottom:0;">
+        <div class="pill-group" style="display:flex; gap:6px;">
+          <div id="pill-hd" onclick="selectQuality('hd')" class="pill-label" style="background:rgba(0,229,255,0.15); border-color:var(--accent-primary); color:var(--accent-primary); box-shadow:0 0 10px rgba(0,229,255,0.1);">
+            HD &nbsp;<span style="font-size:0.8em; font-weight:900;">1 CR</span>
+          </div>
+          <div id="pill-4k" onclick="selectQuality('4k')" class="pill-label" style="display:none;">
+            4K &nbsp;<span style="font-size:0.8em; font-weight:900;">4 CR</span>
+          </div>
+          <input type="radio" id="quality-hd" name="render_quality" value="hd" checked style="display:none;">
+          <input type="radio" id="quality-4k" name="render_quality" value="4k" style="display:none;">
+        </div>
+        <div id="quality-hint" style="font-size:0.65em; color:var(--text-muted); margin-top:8px; line-height:1.4;">HD — Fast, standard quality render.</div>
+      </div>
+    </div>
+
+    <div class="render-actions" style="display:flex; flex-direction:column; gap:8px;">
+      <button id="main-render-btn" onclick="startRender()" style="width: 100%;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
+        <span data-i18n="btn_generate">Run AI Rendering</span> (<span id="render-btn-label">1 CR</span>)
+      </button>
+      <button id="batch-render-btn" onclick="window.openBatchRenderModal()" style="width: 100%; padding: 12px; border: 1px dashed rgba(0, 229, 255, 0.4); border-radius: 8px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent-primary); background: rgba(0, 229, 255, 0.05); box-shadow: 0 4px 18px rgba(0, 229, 255, 0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span data-i18n="btn_batch">Batch Render</span>
+      </button>
+    </div>
+
+  </div><!-- /.right-sidebar-body -->
+</div><!-- /.right-sidebar -->
+
+
+<!-- ═══════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════ -->
+
+<!-- Profile Modal -->
+<div id="profile-modal" class="modal-overlay" style="z-index:2500;">
+  <div class="modal-card" style="max-width:580px;">
+    <div class="modal-top-line"></div>
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <h2>Operator Profile</h2>
+      </div>
+      <button class="modal-close" onclick="hideProfileModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="profile-identity">
+        <div class="profile-avatar-lg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px; color:var(--accent-gold);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="profile-identity-info">
+          <div class="profile-identity-name">SketchupGurus Architect</div>
+          <div class="profile-identity-email" id="profile-modal-email">—</div>
+        </div>
+        <div class="profile-status-badge">✓ Active</div>
+      </div>
+      <div class="profile-stats">
+        <div class="profile-stat-card">
+          <div class="stat-label">⏱ Time You'll Save</div>
+          <div class="stat-value">48.3 <span class="stat-unit">hrs/project</span></div>
+          <div class="stat-sub">97% faster than traditional</div>
+          <div class="stat-compare">
+            <div class="stat-compare-item"><span>Traditional</span><strong style="color:var(--text-muted);">~50h</strong></div>
+            <div class="stat-arrow">→</div>
+            <div class="stat-compare-item"><span style="color:var(--accent-primary);">With SGAI</span><strong style="color:var(--accent-primary);">~2h</strong></div>
+          </div>
+        </div>
+        <div class="profile-stat-card" style="display:flex; flex-direction:column;">
+          <div class="stat-label">📚 Plan Overview</div>
+          <div class="credits-value"><span id="profile-modal-credits">0</span> <span>credits left</span></div>
+          <div class="credits-bar-track"><div class="credits-bar-fill"></div></div>
+          <div class="credits-bar-meta"><span>Live Sync Active</span><span>Recharge Available</span></div>
+          <button class="profile-upgrade-btn" onclick="hideProfileModal(); showPaywall();">👑 Upgrade Plan</button>
+        </div>
+      </div>
+      <button class="profile-logout-btn" onclick="logoutUser(); hideProfileModal();">Terminate Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- Auth Modal -->
+<div id="auth-modal" class="modal-overlay" style="background:rgba(0,0,0,0.95); z-index:2000;">
+  <div class="modal-card" style="max-width:400px;">
+    <div class="modal-top-line"></div>
+    <div class="modal-body" style="padding:28px;">
+      <div class="auth-logo">
+        <div class="auth-logo-mark" style="background: transparent; width: 64px; height: 64px; margin-bottom: 16px;">
+          <img src="logo.png" alt="SketchUpGurus Logo" style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
+        <div class="auth-title" id="auth-title">Welcome Back</div>
+        <div class="auth-sub">SketchupGurus AI — Render Engine v3</div>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="toggleAuthMode('login')">Login</button>
+        <button class="auth-tab" id="tab-signup" onclick="toggleAuthMode('signup')">Sign Up</button>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="auth-email" placeholder="architect@studio.com">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••">
+      </div>
+      <div id="otp-group" class="form-field" style="display:none;">
+        <label class="form-label gold">Verification Code (OTP)</label>
+        <input type="text" id="auth-otp" class="otp-input" placeholder="123456" maxlength="6">
+      </div>
+      <button id="auth-action-btn" class="auth-action-btn" onclick="submitAuth()">Login to Account</button>
+
+      <!-- Google Sign-In -->
+      <div id="google-signin-wrapper" style="margin: 16px 0 8px; text-align: center; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px;">
+        <div style="font-family: var(--font-mono); font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px;">— or —</div>
+        <div id="google-signin-btn" style="margin-top: 4px;"></div>
+      </div>
+
+      <div id="auth-error" class="auth-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Paywall Modal -->
+<div id="paywall-modal" class="modal-overlay" style="z-index:2000;">
+  <div class="modal-card" style="max-width:540px;">
+    <div class="modal-top-line gold"></div>
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-gold);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <h2 style="color:var(--accent-gold);">Upgrade Compute</h2>
+      </div>
+      <button class="modal-close" onclick="hidePaywall()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="paywall-header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div class="paywall-title">Insufficient Credits</div>
+      <p class="paywall-sub">Your render requires more compute than you have available. Purchase a pack below to continue.</p>
+      
+      <!-- Currency Selector -->
+      <div class="paywall-currency-container">
+        <span class="paywall-currency-label">Display Currency</span>
+        <select id="paywall-currency" class="paywall-currency-select" onchange="updatePaywallPrices()">
+          <option value="USD">USD ($)</option>
+          <option value="EUR">EUR (€)</option>
+          <option value="INR">INR (₹)</option>
+          <option value="GBP">GBP (£)</option>
+          <option value="JPY">JPY (¥)</option>
+        </select>
+      </div>
+
+      <div class="paywall-tiers">
+        <div class="price-tier" onclick="payWithRazorpay('starter')">
+          <div class="price-tier-renders">11</div>
+          <div class="price-tier-label">Credits · Starter</div>
+          <div class="price-tier-price" id="price-starter" data-usd="5.00">$5.00 USD</div>
+          <button class="copy-link-btn" onclick="copyPaymentLink(event, 'starter')" style="margin-top: 10px; font-family: var(--font-mono); font-size: 8px; background: rgba(0, 229, 255, 0.06); border: 1px solid rgba(0, 229, 255, 0.2); color: var(--accent-primary); padding: 5px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; outline: none; width: 100%; position: relative; z-index: 10; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+            Copy Link
+          </button>
+        </div>
+        <div class="price-tier featured" onclick="payWithRazorpay('pro')">
+          <div class="price-tier-badge">Popular</div>
+          <div class="price-tier-renders">41</div>
+          <div class="price-tier-label">Credits · Pro</div>
+          <div class="price-tier-price" id="price-pro" data-usd="11.00">$11.00 USD</div>
+          <button class="copy-link-btn" onclick="copyPaymentLink(event, 'pro')" style="margin-top: 10px; font-family: var(--font-mono); font-size: 8px; background: rgba(0, 229, 255, 0.06); border: 1px solid rgba(0, 229, 255, 0.2); color: var(--accent-primary); padding: 5px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; outline: none; width: 100%; position: relative; z-index: 10; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+            Copy Link
+          </button>
+        </div>
+        <div class="price-tier" onclick="payWithRazorpay('studio')">
+          <div class="price-tier-renders">151</div>
+          <div class="price-tier-label">Credits · Studio</div>
+          <div class="price-tier-price" id="price-studio" data-usd="41.00">$41.00 USD</div>
+          <button class="copy-link-btn" onclick="copyPaymentLink(event, 'studio')" style="margin-top: 10px; font-family: var(--font-mono); font-size: 8px; background: rgba(0, 229, 255, 0.06); border: 1px solid rgba(0, 229, 255, 0.2); color: var(--accent-primary); padding: 5px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; outline: none; width: 100%; position: relative; z-index: 10; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+            Copy Link
+          </button>
+        </div>
+      </div>
+      <button class="paywall-back-btn" onclick="hidePaywall()">Return to Workspace</button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Edit Toolbar -->
+<div class="floating-toolbar" id="floating-toolbar" style="display:none;">
+  <button class="toolbar-btn" title="Brush size">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+  </button>
+  <input type="range" id="brush-size" min="5" max="80" value="30" style="width:80px; padding:0; border:none; background:transparent;">
+  <div class="toolbar-divider"></div>
+  <input class="toolbar-input" id="inline-edit-prompt" type="text" placeholder="Describe the modification...">
+  <div class="toolbar-divider"></div>
+  <button class="toolbar-btn" onclick="clearMask()" title="Clear mask" style="color:var(--danger);">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+  </button>
+  <button class="toolbar-btn" onclick="submitEdit()" title="Submit edit" style="color:var(--accent-primary);">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
+  </button>
+  <button class="toolbar-btn" onclick="exitEditMode()" title="Exit edit">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
+
+<!-- HISTORY SELECTOR MODAL -->
+<div id="history-picker-modal" class="modal-overlay" style="z-index: 2600; display: none;">
+  <div class="modal-card" style="max-width: 580px;">
+    <div class="modal-top-line"></div>
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; margin-right:6px; color:var(--accent-primary);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <h2 style="font-size:14px; font-weight:700; margin:0;" data-i18n="history_picker_title">Select Image from History</h2>
+      </div>
+      <button class="modal-close" onclick="hideHistoryPicker()">&times;</button>
+    </div>
+    <div class="modal-body" style="padding: 20px;">
+      <div class="vid-hist-grid" id="history-picker-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-height: 380px; overflow-y: auto;">
+        <!-- Loaded dynamically -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SPLIT JS — load order matters
+     (localization first to translate UI elements before main app init)
+═══════════════════════════════════════════ -->
+<script src="js/localization.js"></script>
+<script src="js/app.js"></script>
+<script src="js/history.js"></script>
+<script src="js/results.js"></script>
+<script src="js/video.js"></script>
+<script src="js/image3d.js"></script>
+<!-- <script src="js/video_workflow.js"></script> -->
+<script src="js/batch.js"></script>
+
+<!-- BATCH RENDER MODAL -->
+<div id="batch-render-modal" class="modal-overlay" style="z-index: 2600; display: none;">
+  <div class="modal-card" style="max-width: 600px; width: 90%; background: rgba(10, 13, 20, 0.9); border: 1px solid rgba(0, 229, 255, 0.15); backdrop-filter: blur(20px);">
+    <div class="modal-top-line" style="background: linear-gradient(90deg, var(--accent-primary), var(--accent-gold));"></div>
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; margin-right:6px; color:var(--accent-primary);"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <h2 style="font-size:14px; font-weight:700; margin:0;" data-i18n="batch_title">AI Batch Rendering</h2>
+      </div>
+      <button class="modal-close" onclick="window.hideBatchRenderModal()">&times;</button>
+    </div>
+    
+    <!-- Setup View -->
+    <div id="batch-setup-view" class="modal-body" style="padding: 20px;">
+      <!-- Source Selector Tabs -->
+      <div class="vid-src-tabs" style="margin-bottom:16px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;">
+        <div class="vid-src-tab active" id="batch-tab-scenes" onclick="window.switchBatchTab('scenes')">Scenes</div>
+        <div class="vid-src-tab" id="batch-tab-upload" onclick="window.switchBatchTab('upload')">Upload</div>
+        <div class="vid-src-tab" id="batch-tab-screenshot" onclick="window.switchBatchTab('screenshot')">Screenshots</div>
+      </div>
+
+      <!-- Tab Content: SketchUp Scenes -->
+      <div id="batch-content-scenes" style="margin-bottom: 16px;">
+        <div style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Select Scenes to Render</div>
+        <div id="batch-scenes-list" style="max-height: 150px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; display: flex; flex-direction: column; gap: 4px;">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+      
+      <!-- Tab Content: Upload Images -->
+      <div id="batch-content-upload" style="margin-bottom: 16px; display: none;">
+        <div style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Upload Images to Batch</div>
+        <div onclick="document.getElementById('batch-file-input').click()" style="border: 1px dashed rgba(0, 229, 255, 0.25); background: rgba(0, 229, 255, 0.02); border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; transition: 0.2s;">
+          <span style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-primary);">Click to add images...</span>
+          <input type="file" id="batch-file-input" multiple accept="image/*" style="display: none;" onchange="window.handleBatchFileUpload(event)">
+        </div>
+        <div id="batch-files-grid" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; max-height: 120px; overflow-y: auto;"></div>
+      </div>
+
+      <!-- Tab Content: Screenshots -->
+      <div id="batch-content-screenshot" style="margin-bottom: 16px; display: none;">
+        <div style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Viewport Screenshots</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <button onclick="window.grabBatchScreenshot()" style="flex: 1; padding: 10px; background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 6px; color: var(--accent-primary); font-family: var(--font-mono); font-size: 9px; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; outline: none;">
+            📸 Grab Viewport
+          </button>
+          <button onclick="window.addExistingScreenshotToBatch()" style="flex: 1; padding: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: var(--text-main); font-family: var(--font-mono); font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; outline: none;">
+            ➕ Add Last Captured
+          </button>
+        </div>
+        <div id="batch-screenshots-grid" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 120px; overflow-y: auto; padding: 4px;"></div>
+      </div>
+      
+      <!-- Batch Prompt Override -->
+      <div style="margin-bottom: 20px;">
+        <div style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Batch Motion/Render Prompt</div>
+        <textarea id="batch-prompt-override" placeholder="Describe the desired output style or theme..." style="width: 100%; min-height: 60px; background: var(--input-bg); border: 1px solid rgba(0, 229, 255, 0.15); border-radius: 6px; color: var(--text-main); padding: 8px 10px; font-family: var(--font-mono); font-size: 10px; resize: vertical; outline: none;"></textarea>
+      </div>
+      
+      <!-- Total Cost & Run Trigger -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted);">Estimated Cost</span>
+          <span id="batch-total-cost" style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-primary);">0.0 CR</span>
+        </div>
+        <button onclick="window.startBatchRender()" style="padding: 10px 20px; background: linear-gradient(135deg, var(--accent-primary), rgba(0, 172, 193, 0.9)); border: none; border-radius: 6px; color: #fff; font-family: var(--font-mono); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 229, 255, 0.2);">
+          Start Batch Render 🚀
+        </button>
+      </div>
+    </div>
+    
+    <!-- Progress View -->
+    <div id="batch-progress-view" class="modal-body" style="padding: 20px; display: none;">
+      <!-- Overall Progress Bar -->
+      <div style="margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 10px; color: var(--text-main); margin-bottom: 6px;">
+          <span>Batch Progress</span>
+          <span id="batch-progress-text" style="font-weight: 700; color: var(--accent-primary);">0%</span>
+        </div>
+        <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,255,255,0.03);">
+          <div id="batch-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-gold)); transition: width 0.3s ease;"></div>
+        </div>
+      </div>
+      
+      <!-- Split panel layout -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <!-- Status List -->
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Render Queue</div>
+          <div id="batch-status-list" style="height: 180px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px;">
+            <!-- Status rows loaded dynamically -->
+          </div>
+        </div>
+        
+        <!-- Live Gallery -->
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Generated Gallery</div>
+          <div id="batch-results-gallery" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; height: 180px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px;">
+            <!-- Output thumbnails loaded dynamically -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Cancel / Close action -->
+      <div style="display: flex; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
+        <button id="batch-cancel-btn" onclick="window.hideBatchRenderModal()" style="padding: 10px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: var(--text-main); font-family: var(--font-mono); font-size: 10px; cursor: pointer; transition: 0.2s;">
+          CANCEL BATCH
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BATCH LIGHTBOX MODAL -->
+<div id="batch-lightbox-modal" class="modal-overlay" style="z-index: 2800; display: none;" onclick="this.style.display='none'">
+  <div style="position: relative; max-width: 90%; max-height: 90%; display: flex; align-items: center; justify-content: center;">
+    <img id="batch-lightbox-img" src="" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; border: 2px solid rgba(0, 229, 255, 0.4); box-shadow: 0 10px 50px rgba(0,0,0,0.8);">
+    <button style="position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; border-radius: 50%; background: #0a0d14; border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="document.getElementById('batch-lightbox-modal').style.display='none'">&times;</button>
+  </div>
+</div>
+
+</body>
+</html>

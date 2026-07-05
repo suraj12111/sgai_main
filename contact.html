@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us — SketchUpGurus AI</title>
+  <meta name="description" content="Contact SketchUpGurus AI support team for billing, technical help, or plugin queries. We reply within 24 hours.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/landing.css">
+  <style>
+    /* ── Page hero ── */
+    .contact-hero {
+      background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
+      border-bottom: 1px solid rgba(208,28,28,0.15);
+      padding: 120px 0 60px;
+      text-align: center;
+    }
+    .contact-hero .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 16px;
+      display: block;
+    }
+    .contact-hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      color: var(--white);
+      margin: 0 0 12px;
+      letter-spacing: -1px;
+    }
+    .contact-hero p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.45);
+    }
+
+    /* ── Layout ── */
+    .contact-body {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 72px 32px 100px;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 48px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .contact-body { grid-template-columns: 1fr; }
+    }
+
+    /* ── Info cards (left) ── */
+    .contact-info { display: flex; flex-direction: column; gap: 16px; }
+
+    .info-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 22px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      transition: border-color 0.2s;
+    }
+    .info-card:hover { border-color: rgba(208,28,28,0.25); }
+    .info-card-icon {
+      width: 42px; height: 42px;
+      background: rgba(208,28,28,0.1);
+      border: 1px solid rgba(208,28,28,0.2);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .info-card-icon svg { width: 18px; height: 18px; fill: var(--red); }
+    .info-card-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 6px;
+    }
+    .info-card-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--white);
+      text-decoration: none;
+      display: block;
+    }
+    .info-card-value:hover { color: var(--red); }
+    .info-card-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 4px;
+      line-height: 1.6;
+    }
+
+    .hours-rows { margin-top: 8px; }
+    .hours-row {
+      display: flex; justify-content: space-between;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 13px;
+    }
+    .hours-row:last-child { border-bottom: none; }
+    .hours-row .day { color: rgba(255,255,255,0.6); }
+    .badge-open {
+      background: rgba(34,197,94,0.12);
+      border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 8px; padding: 1px 8px;
+      font-size: 11px; font-weight: 600; color: #4ade80;
+    }
+    .badge-closed {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 1px 8px;
+      font-size: 11px; color: rgba(255,255,255,0.3);
+    }
+
+    .response-banner {
+      background: rgba(208,28,28,0.06);
+      border: 1px solid rgba(208,28,28,0.15);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 4px;
+    }
+    .response-pulse {
+      width: 10px; height: 10px;
+      background: var(--red);
+      border-radius: 50%;
+      flex-shrink: 0;
+      animation: rpulse 1.8s infinite;
+    }
+    @keyframes rpulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(208,28,28,0.4); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(208,28,28,0); }
+    }
+    .response-text { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+    .response-text strong { color: var(--white); }
+
+    /* ── Form card (right) ── */
+    .form-card {
+      background: #141414;
+      border: 1px solid rgba(208,28,28,0.2);
+      border-radius: 20px;
+      padding: 36px 32px;
+      position: sticky;
+      top: 90px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 32px 80px rgba(0,0,0,0.5);
+    }
+
+    .form-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--white);
+      margin: 0 0 4px;
+      letter-spacing: -0.4px;
+    }
+    .form-subtitle {
+      font-size: 13px;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 28px;
+    }
+
+    /* ── Form fields ── */
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 8px;
+      letter-spacing: 0.2px;
+    }
+    .form-label .req { color: var(--red); margin-left: 2px; }
+    .form-input, .form-textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 13px 16px;
+      font-size: 14px;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+    .form-input::placeholder, .form-textarea::placeholder {
+      color: rgba(255,255,255,0.2);
+    }
+    .form-input:focus, .form-textarea:focus {
+      border-color: rgba(208,28,28,0.5);
+      background: rgba(208,28,28,0.04);
+      box-shadow: 0 0 0 3px rgba(208,28,28,0.08);
+    }
+    .form-textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    /* Phone field */
+    .phone-wrap {
+      display: flex;
+      gap: 0;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.04);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .phone-wrap:focus-within {
+      border-color: rgba(208,28,28,0.5);
+      box-shadow: 0 0 0 3px rgba(208,28,28,0.08);
+    }
+    .phone-prefix {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.55);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .phone-flag { font-size: 16px; }
+    .phone-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 13px 14px;
+      font-size: 14px;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      outline: none;
+    }
+    .phone-input::placeholder { color: rgba(255,255,255,0.2); }
+
+    /* Radio group */
+    .radio-group { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .radio-option:hover {
+      border-color: rgba(208,28,28,0.3);
+      background: rgba(208,28,28,0.04);
+    }
+    .radio-option input[type="radio"] { display: none; }
+    .radio-dot {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s;
+    }
+    .radio-dot::after {
+      content: '';
+      width: 8px; height: 8px;
+      background: var(--red);
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .radio-option input[type="radio"]:checked ~ .radio-dot {
+      border-color: var(--red);
+    }
+    .radio-option input[type="radio"]:checked ~ .radio-dot::after {
+      opacity: 1;
+    }
+    .radio-option:has(input:checked) {
+      border-color: rgba(208,28,28,0.35);
+      background: rgba(208,28,28,0.05);
+    }
+    .radio-label { font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 500; }
+
+    /* Submit button */
+    .form-submit {
+      width: 100%;
+      padding: 15px;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 8px;
+      letter-spacing: 0.3px;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .form-submit:hover {
+      background: #b91c1c;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(208,28,28,0.35);
+    }
+    .form-submit:active { transform: translateY(0); }
+    .form-submit svg { width: 16px; height: 16px; fill: currentColor; }
+
+    /* Privacy note */
+    .form-privacy {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+    }
+    .form-privacy svg { width: 13px; height: 13px; fill: rgba(255,255,255,0.25); flex-shrink: 0; }
+
+    /* Success state */
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .form-success .success-icon {
+      width: 60px; height: 60px;
+      background: rgba(34,197,94,0.1);
+      border: 2px solid rgba(34,197,94,0.3);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 26px;
+    }
+    .form-success h3 { font-size: 1.2rem; color: var(--white); margin: 0 0 8px; }
+    .form-success p { font-size: 14px; color: rgba(255,255,255,0.45); margin: 0; }
+
+    .policy-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      letter-spacing: 0.3px;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .policy-back:hover { color: var(--white); }
+    .policy-back svg { width: 14px; height: 14px; fill: currentColor; }
+    /* Google Form wrapper */
+    .gform-wrap {
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+      margin: 0 -4px;
+    }
+    .gform-wrap iframe {
+      display: block;
+      border: none;
+    }
+
+    nav { position: sticky; top: 0; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23d01c1c'/%3E%3Cpath d='M10 20 L16 10 L22 20 Z' fill='white'/%3E%3C/svg%3E" alt="SketchUpGurus AI Logo" class="nav-logo-img" style="width:28px;height:28px;">
+    SketchUpGurus<span>AI</span>
+  </a>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="index.html#features">Features</a></li>
+    <li><a href="index.html#how">How it Works</a></li>
+    <li><a href="index.html#about">Creator</a></li>
+    <li><a href="index.html#gallery">Gallery</a></li>
+    <li><a href="index.html#pricing">Pricing</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="index.html" class="nav-cta">Get Started Free</a>
+    <button class="nav-mobile-toggle" aria-label="Toggle menu" onclick="toggleMobileMenu(event)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="menu-icon-open"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="menu-icon-close" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="contact-hero">
+  <span class="eyebrow">Support</span>
+  <h1>Contact Us</h1>
+  <p>We're here to help. Tell us how we can assist you.</p>
+</section>
+
+<!-- BODY -->
+<div class="contact-body">
+
+  <!-- LEFT — Info -->
+  <div class="contact-info">
+
+    <a href="index.html" class="policy-back">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Back to Home
+    </a>
+
+    <div class="response-banner">
+      <div class="response-pulse"></div>
+      <div class="response-text"><strong>Typical response time: 24–48 hours</strong><br>Monday–Friday, 9 AM – 6 PM IST</div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      </div>
+      <div>
+        <div class="info-card-label">Customer Support &amp; Billing</div>
+        <a href="mailto:sg@sketchupgurus.co.in" class="info-card-value">sg@sketchupgurus.co.in</a>
+        <p class="info-card-sub">For billing queries, include your registered email and Razorpay transaction ID.</p>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+      </div>
+      <div>
+        <div class="info-card-label">Operating Hours (IST)</div>
+        <div class="hours-rows">
+          <div class="hours-row"><span class="day">Monday – Friday</span><span class="badge-open">9 AM – 6 PM</span></div>
+          <div class="hours-row"><span class="day">Saturday</span><span class="badge-closed">Closed</span></div>
+          <div class="hours-row"><span class="day">Sunday</span><span class="badge-closed">Closed</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      </div>
+      <div>
+        <div class="info-card-label">Registered Address</div>
+        <span class="info-card-value" style="cursor:default; font-size:15px;">SketchUpGurus</span>
+        <p class="info-card-sub">Lucknow, Uttar Pradesh, India<br><em>Legal &amp; compliance purposes only. No in-person support.</em></p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT — Google Form -->
+  <div class="form-card">
+    <p class="form-title">Send Us a Message</p>
+    <p class="form-subtitle">We typically reply within 24 hours</p>
+    <div class="gform-wrap">
+      <iframe
+        src="https://docs.google.com/forms/d/e/1FAIpQLSeeHaSDYQ2aO2SZ2bgSAbAOQbHMHYr3NDsmtCGNZrfOOAEX1w/viewform?embedded=true"
+        width="100%"
+        height="1260"
+        frameborder="0"
+        marginheight="0"
+        marginwidth="0"
+        title="SketchUpGurus AI Contact Form"
+        loading="lazy">
+        Loading…
+      </iframe>
+    </div>
+    <div class="form-privacy" style="margin-top:16px;">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      Your privacy matters. All information shared will remain confidential.
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer style="border-top:1px solid rgba(255,255,255,0.06); padding:32px; text-align:center;">
+  <p style="color:rgba(255,255,255,0.3); font-size:13px; margin:0;">
+    © 2025 SketchUpGurus AI. All rights reserved.
+    &nbsp;·&nbsp;
+    <a href="privacy-policy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Privacy Policy</a>
+    &nbsp;·&nbsp;
+    <a href="refund-policy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Refund Policy</a>
+    &nbsp;·&nbsp;
+    <a href="terms.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Terms &amp; Conditions</a>
+    &nbsp;·&nbsp;
+    <a href="shipping-policy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Shipping Policy</a>
+  </p>
+</footer>
+
+<script src="js/static_nav.js?v=1"></script>
+<script>
+  // Show success state if redirected back after submission
+  window.addEventListener('DOMContentLoaded', () => {
+    const formContent = document.getElementById('form-content');
+    const formSuccess = document.getElementById('form-success');
+    if (window.location.search.includes('sent=1') && formContent && formSuccess) {
+      formContent.style.display = 'none';
+      formSuccess.style.display = 'block';
+    }
+  });
+
+  function resetForm() {
+    const formContent = document.getElementById('form-content');
+    const formSuccess = document.getElementById('form-success');
+    const contactForm = document.getElementById('contact-form');
+    if (formContent) formContent.style.display = 'block';
+    if (formSuccess) formSuccess.style.display = 'none';
+    if (contactForm) contactForm.reset();
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  // Validate phone — numbers only
+  const contactPhone = document.getElementById('contact-phone');
+  if (contactPhone) {
+    contactPhone.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '');
+    });
+  }
+</script>
+</body>
+</html>

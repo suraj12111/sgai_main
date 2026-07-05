@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms &amp; Conditions — SketchUpGurus AI</title>
+  <meta name="description" content="Terms and Conditions for SketchUpGurus AI Plugin. Defines what users are buying, how the service works, and the rules of use.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/landing.css">
+  <style>
+    .policy-hero {
+      background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
+      border-bottom: 1px solid rgba(208,28,28,0.15);
+      padding: 120px 0 60px;
+      text-align: center;
+    }
+    .policy-hero .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 16px;
+      display: block;
+    }
+    .policy-hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      color: var(--white);
+      margin: 0 0 16px;
+      letter-spacing: -1px;
+    }
+    .policy-hero .effective {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.5px;
+    }
+    .policy-hero .effective span {
+      color: rgba(255,255,255,0.65);
+      font-weight: 500;
+    }
+    .policy-body {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 32px 100px;
+    }
+    .policy-intro {
+      background: rgba(208,28,28,0.06);
+      border: 1px solid rgba(208,28,28,0.15);
+      border-radius: 8px;
+      padding: 24px 28px;
+      margin-bottom: 48px;
+      color: rgba(255,255,255,0.7);
+      font-size: 15px;
+      line-height: 1.75;
+    }
+    .policy-intro strong { color: var(--white); }
+    .policy-intro a { color: var(--red); text-decoration: none; }
+    .policy-intro a:hover { text-decoration: underline; }
+    .policy-section {
+      margin-bottom: 48px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .policy-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .policy-section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .policy-section-num {
+      width: 36px;
+      height: 36px;
+      background: rgba(208,28,28,0.12);
+      border: 1px solid rgba(208,28,28,0.3);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Space Mono', monospace;
+      color: var(--red);
+      flex-shrink: 0;
+    }
+    .policy-section h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--white);
+      margin: 0;
+      letter-spacing: -0.3px;
+    }
+    .policy-section p {
+      color: rgba(255,255,255,0.65);
+      font-size: 15px;
+      line-height: 1.8;
+      margin: 0 0 14px;
+    }
+    .policy-section p:last-child { margin-bottom: 0; }
+    .policy-section a { color: var(--red); text-decoration: none; }
+    .policy-section a:hover { text-decoration: underline; }
+    .policy-highlight {
+      background: rgba(255,255,255,0.03);
+      border-left: 3px solid var(--red);
+      border-radius: 0 6px 6px 0;
+      padding: 16px 20px;
+      margin: 12px 0;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+    .policy-highlight strong {
+      color: rgba(255,255,255,0.9);
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .policy-warning {
+      background: rgba(245,158,11,0.07);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 8px;
+      padding: 18px 22px;
+      margin: 16px 0;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      line-height: 1.75;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .policy-warning-icon { font-size: 20px; flex-shrink: 0; line-height: 1.5; }
+    .policy-danger {
+      background: rgba(208,28,28,0.07);
+      border: 1px solid rgba(208,28,28,0.2);
+      border-radius: 8px;
+      padding: 18px 22px;
+      margin: 16px 0;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      line-height: 1.75;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .policy-danger-icon { font-size: 20px; flex-shrink: 0; line-height: 1.5; }
+    .policy-list {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0 0;
+    }
+    .policy-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.65);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .policy-list li:last-child { border-bottom: none; }
+    .policy-list li::before {
+      content: '—';
+      color: var(--red);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .policy-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    @media (max-width: 600px) { .policy-grid-3 { grid-template-columns: 1fr; } }
+    .policy-grid-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .policy-grid-item .gi-icon { font-size: 22px; margin-bottom: 10px; }
+    .policy-grid-item .gi-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 6px;
+    }
+    .policy-grid-item .gi-desc {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.5;
+    }
+    .policy-contact-card {
+      background: rgba(208,28,28,0.06);
+      border: 1px solid rgba(208,28,28,0.2);
+      border-radius: 10px;
+      padding: 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 16px;
+    }
+    .policy-contact-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(208,28,28,0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .policy-contact-icon svg { width: 22px; height: 22px; fill: var(--red); }
+    .policy-contact-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .policy-contact-email {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .policy-contact-email:hover { color: var(--red); }
+    .policy-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      letter-spacing: 0.3px;
+      margin-bottom: 48px;
+      transition: color 0.2s;
+    }
+    .policy-back:hover { color: var(--white); }
+    .policy-back svg { width: 14px; height: 14px; fill: currentColor; }
+    nav { position: sticky; top: 0; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23d01c1c'/%3E%3Cpath d='M10 20 L16 10 L22 20 Z' fill='white'/%3E%3C/svg%3E" alt="SketchUpGurus AI Logo" class="nav-logo-img" style="width:28px;height:28px;">
+    SketchUpGurus<span>AI</span>
+  </a>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="index.html#features">Features</a></li>
+    <li><a href="index.html#how">How it Works</a></li>
+    <li><a href="index.html#about">Creator</a></li>
+    <li><a href="index.html#gallery">Gallery</a></li>
+    <li><a href="index.html#pricing">Pricing</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="index.html" class="nav-cta">Get Started Free</a>
+    <button class="nav-mobile-toggle" aria-label="Toggle menu" onclick="toggleMobileMenu(event)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="menu-icon-open"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="menu-icon-close" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="policy-hero">
+  <span class="eyebrow">Legal</span>
+  <h1>Terms &amp; Conditions</h1>
+  <p class="effective">Effective Date: <span>March 22, 2026</span> &nbsp;·&nbsp; Service: <span>SketchUpGurus AI Plugin</span></p>
+</section>
+
+<!-- BODY -->
+<div class="policy-body">
+
+  <a href="index.html" class="policy-back">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Back to Home
+  </a>
+
+  <!-- INTRO -->
+  <div class="policy-intro">
+    Welcome to <strong>SketchUpGurus</strong>. These Terms and Conditions ("Terms") govern your access to and use of the SketchUpGurus AI desktop plugin for SketchUp and any associated services, websites, or software provided by us (collectively, the "Service"). By downloading, installing, or using the Service, you agree to be bound by these Terms. If you disagree with any part of these Terms, you may not use our Service.
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">01</div>
+      <h2>Description of Service</h2>
+    </div>
+    <p>SketchUpGurus AI is a third-party software extension (plugin) designed to operate within the SketchUp desktop application. It utilizes artificial intelligence to process 3D viewport captures and text prompts to generate 2D architectural renderings.</p>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">02</div>
+      <h2>User Accounts and Authentication</h2>
+    </div>
+    <div class="policy-highlight">
+      <strong>Registration</strong>
+      To use the rendering features of the Service, you must authenticate using a valid email address.
+    </div>
+    <div class="policy-highlight">
+      <strong>Responsibility</strong>
+      You are responsible for maintaining the confidentiality of your account credentials. You agree to accept responsibility for any and all activities or actions that occur under your account.
+    </div>
+    <div class="policy-highlight">
+      <strong>Account Sharing</strong>
+      Digital rendering credits are tied to the specific email address used during authentication and are strictly non-transferable.
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">03</div>
+      <h2>Purchases and Digital Credits</h2>
+    </div>
+    <div class="policy-grid-3">
+      <div class="policy-grid-item">
+        <div class="gi-icon">💳</div>
+        <div class="gi-label">Pay-As-You-Go</div>
+        <div class="gi-desc">Purchase credit packs via Razorpay. No subscriptions or recurring charges.</div>
+      </div>
+      <div class="policy-grid-item">
+        <div class="gi-icon">⚡</div>
+        <div class="gi-label">Instant Delivery</div>
+        <div class="gi-desc">Credits deposited immediately into your account on successful payment.</div>
+      </div>
+      <div class="policy-grid-item">
+        <div class="gi-icon">🚫</div>
+        <div class="gi-label">No Cash Value</div>
+        <div class="gi-desc">Credits cannot be redeemed, cashed out, or refunded for fiat currency.</div>
+      </div>
+    </div>
+    <p style="margin-top:20px;">One (1) digital credit is consumed for each successful image generation or image modification request processed by our AI engine.</p>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">04</div>
+      <h2>Refund Policy</h2>
+    </div>
+    <p>Due to the nature of the Service (non-tangible, irrevocable digital goods and server processing time), <strong style="color:rgba(255,255,255,0.85);">all sales are final</strong>. We do not issue refunds once a transaction is processed and the digital credits have been added to your account.</p>
+    <div class="policy-warning">
+      <div class="policy-warning-icon">💡</div>
+      <div>If a technical error causes you to be charged without receiving your credits, please contact our support team immediately at <a href="mailto:sg@sketchupgurus.co.in" style="color:var(--red);">sg@sketchupgurus.co.in</a> with your payment receipt for a manual credit adjustment.</div>
+    </div>
+    <p>For the full refund eligibility details, see our <a href="refund-policy.html">Refund Policy</a> page.</p>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">05</div>
+      <h2>Intellectual Property and Ownership</h2>
+    </div>
+    <div class="policy-highlight">
+      <strong>✅ Your Models</strong>
+      You retain all ownership rights to your original 3D SketchUp models and base images.
+    </div>
+    <div class="policy-highlight">
+      <strong>✅ Generated Renders</strong>
+      You retain all ownership and commercial usage rights to the final 2D images generated by the Service using your prompts and models.
+    </div>
+    <div class="policy-highlight">
+      <strong>🔒 Our Software</strong>
+      The SketchUpGurus AI plugin, its source code, UI design, and underlying architecture are the exclusive property of SketchUpGurus. You may not reverse-engineer, decompile, distribute, or create derivative works from our software.
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">06</div>
+      <h2>Acceptable Use and Restrictions</h2>
+    </div>
+    <p>You agree <strong style="color:rgba(255,255,255,0.85);">not</strong> to use the Service to:</p>
+    <ul class="policy-list">
+      <li>Generate, upload, or transmit any content that is illegal, defamatory, harassing, sexually explicit, or promotes violence or discrimination.</li>
+      <li>Infringe upon the copyrights, trademarks, or intellectual property rights of others.</li>
+      <li>Attempt to bypass, exploit, or hack the credit billing system or API endpoints.</li>
+      <li>Use automated scripts, bots, or scrapers to send requests to our rendering engine.</li>
+    </ul>
+    <div class="policy-danger">
+      <div class="policy-danger-icon">⛔</div>
+      <div>Violation of these rules will result in the <strong style="color:rgba(255,255,255,0.85);">immediate termination</strong> of your account and forfeiture of any remaining digital credits without refund.</div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">07</div>
+      <h2>Disclaimer of Warranties</h2>
+    </div>
+    <p>The Service is provided on an <strong style="color:rgba(255,255,255,0.85);">"AS IS"</strong> and <strong style="color:rgba(255,255,255,0.85);">"AS AVAILABLE"</strong> basis.</p>
+    <div class="policy-highlight">
+      <strong>AI Limitations</strong>
+      Artificial Intelligence is an automated, unpredictable process. We do not guarantee that the generated images will perfectly match your exact expectations, physical physics, or precise architectural dimensions.
+    </div>
+    <div class="policy-highlight">
+      <strong>Uptime</strong>
+      The Service relies on third-party cloud infrastructure and API providers. We do not warrant that the Service will be uninterrupted, completely secure, or error-free.
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">08</div>
+      <h2>Limitation of Liability</h2>
+    </div>
+    <p>To the maximum extent permitted by applicable law, in no event shall SketchUpGurus, its developers, or its affiliates be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or business opportunities, arising from your use of or inability to use the Service.</p>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">09</div>
+      <h2>Changes to Terms</h2>
+    </div>
+    <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms.</p>
+    <div class="policy-contact-card">
+      <div class="policy-contact-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      </div>
+      <div>
+        <div class="policy-contact-label">Questions about these Terms?</div>
+        <a href="mailto:sg@sketchupgurus.co.in" class="policy-contact-email">sg@sketchupgurus.co.in</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer style="border-top:1px solid rgba(255,255,255,0.06); padding:32px; text-align:center;">
+  <p style="color:rgba(255,255,255,0.3); font-size:13px; margin:0;">
+    © 2025 SketchUpGurus AI. All rights reserved.
+    &nbsp;·&nbsp;
+    <a href="privacy-policy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Privacy Policy</a>
+    &nbsp;·&nbsp;
+    <a href="refund-policy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Refund Policy</a>
+    &nbsp;·&nbsp;
+    <a href="terms.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Terms &amp; Conditions</a>
+  </p>
+</footer>
+
+<script src="js/static_nav.js?v=1"></script>
+</body>
+</html>

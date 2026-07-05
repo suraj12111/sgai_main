@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shipping &amp; Delivery Policy — SketchUpGurus AI</title>
+  <meta name="description" content="Shipping and Delivery Policy for SketchUpGurus AI Plugin. All products are digital — credits are delivered instantly after purchase.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/landing.css">
+  <style>
+    .policy-hero {
+      background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
+      border-bottom: 1px solid rgba(208,28,28,0.15);
+      padding: 120px 0 60px;
+      text-align: center;
+    }
+    .policy-hero .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 16px;
+      display: block;
+    }
+    .policy-hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      color: var(--white);
+      margin: 0 0 16px;
+      letter-spacing: -1px;
+    }
+    .policy-hero .effective {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+    }
+    .policy-hero .effective span {
+      color: rgba(255,255,255,0.65);
+      font-weight: 500;
+    }
+    .policy-body {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 32px 100px;
+    }
+    .policy-intro {
+      background: rgba(208,28,28,0.06);
+      border: 1px solid rgba(208,28,28,0.15);
+      border-radius: 8px;
+      padding: 24px 28px;
+      margin-bottom: 48px;
+      color: rgba(255,255,255,0.7);
+      font-size: 15px;
+      line-height: 1.75;
+    }
+    .policy-intro strong { color: var(--white); }
+    .policy-intro a { color: var(--red); text-decoration: none; }
+    .policy-intro a:hover { text-decoration: underline; }
+    .policy-section {
+      margin-bottom: 48px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .policy-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .policy-section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .policy-section-num {
+      width: 36px;
+      height: 36px;
+      background: rgba(208,28,28,0.12);
+      border: 1px solid rgba(208,28,28,0.3);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Space Mono', monospace;
+      color: var(--red);
+      flex-shrink: 0;
+    }
+    .policy-section h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--white);
+      margin: 0;
+      letter-spacing: -0.3px;
+    }
+    .policy-section p {
+      color: rgba(255,255,255,0.65);
+      font-size: 15px;
+      line-height: 1.8;
+      margin: 0 0 14px;
+    }
+    .policy-section p:last-child { margin-bottom: 0; }
+    .policy-section a { color: var(--red); text-decoration: none; }
+    .policy-section a:hover { text-decoration: underline; }
+    .policy-highlight {
+      background: rgba(255,255,255,0.03);
+      border-left: 3px solid var(--red);
+      border-radius: 0 6px 6px 0;
+      padding: 16px 20px;
+      margin: 12px 0;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+    .policy-highlight strong {
+      color: rgba(255,255,255,0.9);
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .policy-warning {
+      background: rgba(245,158,11,0.07);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 8px;
+      padding: 18px 22px;
+      margin: 16px 0;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      line-height: 1.75;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .policy-warning-icon { font-size: 20px; flex-shrink: 0; line-height: 1.5; }
+
+    /* Delivery Steps */
+    .delivery-steps {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0 0;
+    }
+    .delivery-steps li {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .delivery-steps li:last-child { border-bottom: none; }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      background: rgba(208,28,28,0.12);
+      border: 1px solid rgba(208,28,28,0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'Space Mono', monospace;
+      color: var(--red);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-content .step-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 4px;
+    }
+    .step-content .step-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.6;
+    }
+
+    /* Instant badge */
+    .instant-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.25);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4ade80;
+      margin-bottom: 16px;
+    }
+    .instant-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: pulse-green 1.5s infinite;
+    }
+    @keyframes pulse-green {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Contact section */
+    .contact-section {
+      margin-top: 60px;
+      padding-top: 60px;
+      border-top: 1px solid rgba(208,28,28,0.2);
+    }
+    .contact-section-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--white);
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .contact-section-sub {
+      font-size: 14px;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) { .contact-grid { grid-template-columns: 1fr; } }
+    .contact-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .contact-card.primary {
+      background: rgba(208,28,28,0.06);
+      border-color: rgba(208,28,28,0.2);
+      grid-column: 1 / -1;
+    }
+    .contact-card-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(208,28,28,0.12);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .contact-card-icon svg { width: 18px; height: 18px; fill: var(--red); }
+    .contact-card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 8px;
+    }
+    .contact-card-value {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--white);
+      text-decoration: none;
+      display: block;
+    }
+    .contact-card-value:hover { color: var(--red); }
+    .contact-card-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .hours-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    .hours-table tr { border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .hours-table tr:last-child { border-bottom: none; }
+    .hours-table td {
+      padding: 10px 0;
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+    }
+    .hours-table td:first-child { color: rgba(255,255,255,0.75); font-weight: 500; }
+    .hours-table td:last-child { text-align: right; }
+    .badge-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: #4ade80;
+      font-weight: 600;
+    }
+    .badge-closed {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      font-weight: 600;
+    }
+
+    .policy-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      letter-spacing: 0.3px;
+      margin-bottom: 48px;
+      transition: color 0.2s;
+    }
+    .policy-back:hover { color: var(--white); }
+    .policy-back svg { width: 14px; height: 14px; fill: currentColor; }
+    nav { position: sticky; top: 0; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23d01c1c'/%3E%3Cpath d='M10 20 L16 10 L22 20 Z' fill='white'/%3E%3C/svg%3E" alt="SketchUpGurus AI Logo" class="nav-logo-img" style="width:28px;height:28px;">
+    SketchUpGurus<span>AI</span>
+  </a>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="index.html#features">Features</a></li>
+    <li><a href="index.html#how">How it Works</a></li>
+    <li><a href="index.html#about">Creator</a></li>
+    <li><a href="index.html#gallery">Gallery</a></li>
+    <li><a href="index.html#pricing">Pricing</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="index.html" class="nav-cta">Get Started Free</a>
+    <button class="nav-mobile-toggle" aria-label="Toggle menu" onclick="toggleMobileMenu(event)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="menu-icon-open"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="menu-icon-close" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="policy-hero">
+  <span class="eyebrow">Legal</span>
+  <h1>Shipping &amp; Delivery Policy</h1>
+  <p class="effective">Effective Date: <span>March 22, 2026</span> &nbsp;·&nbsp; Company: <span>SketchUpGurus</span></p>
+</section>
+
+<!-- BODY -->
+<div class="policy-body">
+
+  <a href="index.html" class="policy-back">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Back to Home
+  </a>
+
+  <!-- INTRO -->
+  <div class="policy-intro">
+    This Shipping and Delivery Policy explains how our products are delivered to you after a successful purchase. By purchasing digital rendering credits for the <strong>SketchUpGurus AI</strong> plugin, you agree to the terms outlined below. For questions, contact us at <a href="mailto:sg@sketchupgurus.co.in">sg@sketchupgurus.co.in</a>.
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">01</div>
+      <h2>Digital Delivery Only</h2>
+    </div>
+    <p>SketchUpGurus AI is a <strong style="color:rgba(255,255,255,0.85);">100% digital software product</strong>. We sell digital rendering API credits (e.g., Starter Pack, Pro Pack, Studio Pack) that allow you to use our cloud-based AI rendering engine.</p>
+    <div class="policy-highlight">
+      <strong>🚚 No Physical Shipping</strong>
+      We do not sell physical goods. No physical items will be shipped to your postal address, and no tracking numbers will be provided.
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">02</div>
+      <h2>Delivery Timeframe</h2>
+    </div>
+    <div class="instant-badge">Instant Delivery</div>
+    <p>Upon successful completion of your payment through our secure gateway (Razorpay), your digital rendering credits are delivered <strong style="color:rgba(255,255,255,0.85);">instantly and automatically</strong>.</p>
+    <p>The processing time is typically immediate — your credit balance inside the SketchUp plugin will update <strong style="color:rgba(255,255,255,0.85);">within seconds</strong> of a successful transaction.</p>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">03</div>
+      <h2>How Delivery Works</h2>
+    </div>
+    <ul class="delivery-steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Authenticate</div>
+          <div class="step-desc">You authenticate your account inside the SketchUpGurus AI plugin using your email address.</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Select & Pay</div>
+          <div class="step-desc">You select a credit package and complete the payment via Razorpay's secure gateway.</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Instant Credit</div>
+          <div class="step-desc">Our servers instantly verify the payment and attach the purchased credits to your authenticated email address.</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Balance Refreshed</div>
+          <div class="step-desc">The plugin UI automatically refreshes to display your new available credit balance. You're ready to render!</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="policy-section">
+    <div class="policy-section-header">
+      <div class="policy-section-num">04</div>
+      <h2>Delivery Issues and Delays</h2>
+    </div>
+    <p>While our automated delivery system is designed to be instant, occasional internet connectivity issues or banking delays can occur.</p>
+    <div class="policy-warning">
+      <div class="policy-warning-icon">⚠️</div>
+      <div>If your bank confirms that your account was charged, but your credit balance does not update within <strong style="color:rgba(255,255,255,0.85);">5 minutes</strong>, please try <strong style="color:rgba(255,255,255,0.85);">restarting the SketchUp application</strong> first.</div>
+    </div>
+    <p>If credits still do not appear after a restart, this is considered a <strong style="color:rgba(255,255,255,0.85);">"failed delivery."</strong> Please contact our support team immediately at <a href="mailto:sg@sketchupgurus.co.in">sg@sketchupgurus.co.in</a> with your Razorpay payment receipt or transaction ID.</p>
+    <div class="policy-highlight">
+      <strong>⏱ Resolution Time</strong>
+      We will manually verify the payment and credit your account within <strong style="color:rgba(255,255,255,0.85);">24 hours</strong> of receiving your support request.
+    </div>
+  </div>
+
+  <!-- CONTACT SECTION -->
+  <div class="contact-section">
+    <h2 class="contact-section-title">Contact &amp; Support</h2>
+    <p class="contact-section-sub">We're here to help. Expect a response within 24–48 hours.</p>
+
+    <div class="contact-grid">
+
+      <!-- Email — spans full width -->
+      <div class="contact-card primary">
+        <div class="contact-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        </div>
+        <div class="contact-card-label">Customer Support &amp; Billing</div>
+        <a href="mailto:sg@sketchupgurus.co.in" class="contact-card-value">sg@sketchupgurus.co.in</a>
+        <p class="contact-card-sub">For billing queries, include your registered email address and Razorpay transaction ID for the fastest resolution.</p>
+      </div>
+
+      <!-- Hours -->
+      <div class="contact-card">
+        <div class="contact-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+        </div>
+        <div class="contact-card-label">Operating Hours (IST)</div>
+        <table class="hours-table">
+          <tr>
+            <td>Monday – Friday</td>
+            <td><span class="badge-open">9:00 AM – 6:00 PM</span></td>
+          </tr>
+          <tr>
+            <td>Saturday</td>
+            <td><span class="badge-closed">Closed</span></td>
+          </tr>
+          <tr>
+            <td>Sunday</td>
+            <td><span class="badge-closed">Closed</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Address -->
+      <div class="contact-card">
+        <div class="contact-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        </div>
+        <div class="contact-card-label">Registered Business Address</div>
+        <span class="contact-card-value" style="font-size:15px; cursor:default;">SketchUpGurus</span>
+        <p class="contact-card-sub">Lucknow, Uttar Pradesh<br>India<br><br><em>No in-person support available. For legal and compliance purposes only.</em></p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer style="border-top:1px solid rgba(255,255,255,0.06); padding:32px; text-align:center;">
+  <p style="color:rgba(255,255,255,0.3); font-size:13px; margin:0;">
+    © 2025 SketchUpGurus AI. All rights reserved.
+    &nbsp;·&nbsp;
+    <a href="privacy-policy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Privacy Policy</a>
+    &nbsp;·&nbsp;
+    <a href="refund-policy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Refund Policy</a>
+    &nbsp;·&nbsp;
+    <a href="terms.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Terms &amp; Conditions</a>
+    &nbsp;·&nbsp;
+    <a href="shipping-policy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Shipping Policy</a>
+  </p>
+</footer>
+
+<script src="js/static_nav.js?v=1"></script>
+</body>
+</html>
