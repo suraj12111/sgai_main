@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script src="js/site-config.js?v=18d41a019312"></script>
+  <script src="js/ui-events.js?v=d536b74985a7"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>SGAI SketchUp Sign In</title>
+  <link rel="stylesheet" href="css/desktop-login.css?v=8dd45576af8b">
+  <script src="js/desktop-login.js?v=1ba3d687209e" defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body><main>
+  <img src="logo.png" width="56" height="56" alt="SGAI">
+  <h1>Sign in to SketchUp</h1>
+  <p>Confirm this code matches the one in your SketchUp window.</p>
+  <strong id="code"></strong>
+  <div id="google-button"></div>
+  <p id="account"></p>
+  <button id="approve" hidden type="button">Connect to SketchUp</button>
+  <p id="status" role="status">Loading sign-in...</p>
+</main></body>
+</html>

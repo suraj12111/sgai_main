@@ -1,32 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="js/site-config.js?v=18d41a019312"></script>
+  <script src="js/ui-events.js?v=d536b74985a7"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SGAI — Render Engine v3</title>
 
   <!-- Google tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
 
-    gtag('config', 'G-XXXXXXXXXX');
-  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,700&display=swap" rel="stylesheet">
 
   <!-- ── SPLIT CSS ─────────────────────────── -->
-  <link rel="stylesheet" href="css/main.css?v=7d5f4ce53734">
+  <link rel="stylesheet" href="css/main.css?v=06d0510ad2fa">
+  <link rel="stylesheet" href="css/plugin-update.css?v=604ba1987874">
+  <script src="js/plugin-update.js?v=1e42f72e2408" defer></script>
   <link rel="stylesheet" href="css/modules.css?v=fc36b54ec42d">
   <link rel="stylesheet" href="css/video_workflow.css?v=dc7e74aa275f">
-  <script src="https://accounts.google.com/gsi/client" onload="typeof initGoogleSignIn === 'function' && initGoogleSignIn()" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" data-sg-load="action0" async defer></script>
   <!-- 3D Interactive Model Viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 </head>
 <body>
+<aside id="plugin-update-banner" class="plugin-update-banner" role="status" aria-live="polite" hidden>
+  <button id="plugin-update-dismiss" class="plugin-update-dismiss" type="button" aria-label="Dismiss update notice">×</button>
+  <strong>Update your SGAI plugin</strong>
+  <p>Get the latest features and improved 3D imports with SGAI <span id="plugin-update-version">1.1.7</span>.</p>
+  <div class="plugin-update-actions">
+    <a id="plugin-update-download" class="plugin-update-download" href="downloads/sketchupgurus_ai_omni_1.1.7.rbz" download>Download update</a>
+    <button id="plugin-update-copy" type="button">Copy download link</button>
+  </div>
+  <p id="plugin-update-help" class="plugin-update-help">Install in Extension Manager and restart SketchUp. Download not starting? Copy the link into your browser.</p>
+  <input id="plugin-update-link" type="text" readonly aria-label="Plugin update download link" hidden>
+</aside>
 
 <!-- ═══════════════════════════════════════════
      LEFT SIDEBAR
@@ -49,7 +57,7 @@
       <div class="control-group">
         <p class="group-title">1. Base Geometry</p>
         <!-- Capture button: calls SketchUp Ruby bridge only -->
-        <button class="upload-capture-btn" onclick="captureViewport()">
+        <button class="upload-capture-btn" data-sg-click="action1">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           Capture Viewport
         </button>
@@ -57,7 +65,7 @@
         <div class="divider-text">— or upload manually —</div>
 
         <!-- Upload zone: opens file picker — completely separate from Capture -->
-        <div class="upload-zone" id="upload-zone-main" onclick="document.getElementById('base-upload').click()">
+        <div class="upload-zone" id="upload-zone-main" data-sg-click="action2">
           <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           <span class="upload-label" id="dz-text-1">Upload Base Image</span>
           <span class="upload-sub" id="dz-text-2">Click here — JPG, PNG, WEBP</span>
@@ -71,19 +79,19 @@
         <p class="group-title">2. Visual References</p>
         <div class="input-group">
           <label class="field-label">Style Reference</label>
-          <button class="ref-add-btn" onclick="document.getElementById('style-input').click()">
+          <button class="ref-add-btn" data-sg-click="action3">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add Style Image
           </button>
           <input type="file" id="style-input" hidden accept="image/*">
           <div id="style-preview-container" style="display:none; margin-top:8px; position:relative;">
             <img id="style-preview" style="width:100%; border:1px solid rgba(255,255,255,0.08); border-radius:6px;">
-            <button onclick="clearStyle()" class="prop-remove-btn" style="width:20px; height:20px; font-size:12px;">&times;</button>
+            <button data-sg-click="action4" class="prop-remove-btn" style="width:20px; height:20px; font-size:12px;">&times;</button>
           </div>
         </div>
         <div class="input-group" style="margin-bottom:0;">
           <label class="field-label">Prop Injector</label>
-          <button class="ref-add-btn" onclick="document.getElementById('prop-input').click()">
+          <button class="ref-add-btn" data-sg-click="action5">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add Transparent PNG
           </button>
@@ -99,8 +107,8 @@
         <span style="font-family:var(--font-mono); font-size:10px; font-weight:700; letter-spacing:1.5px; color:var(--text-muted); text-transform:uppercase;">Render History</span>
         <div style="display:flex; gap:6px; align-items:center;">
           <span id="history-count-badge" style="font-family:var(--font-mono); font-size:9px; color:#ffffff;"></span>
-          <button onclick="loadHistoryUI()" style="background:transparent; border:1px solid var(--border-color); color:var(--text-muted); border-radius:5px; padding:3px 9px; font-family:var(--font-mono); font-size:9px; cursor:pointer;">&#8635; Refresh</button>
-          <button onclick="clearAllHistory()" style="background:transparent; border:1px solid rgba(255,79,112,0.25); color:rgba(255,79,112,0.6); border-radius:5px; padding:3px 9px; font-family:var(--font-mono); font-size:9px; cursor:pointer;">Clear All</button>
+          <button data-sg-click="action6" style="background:transparent; border:1px solid var(--border-color); color:var(--text-muted); border-radius:5px; padding:3px 9px; font-family:var(--font-mono); font-size:9px; cursor:pointer;">&#8635; Refresh</button>
+          <button data-sg-click="action7" style="background:transparent; border:1px solid rgba(255,79,112,0.25); color:rgba(255,79,112,0.6); border-radius:5px; padding:3px 9px; font-family:var(--font-mono); font-size:9px; cursor:pointer;">Clear All</button>
         </div>
       </div>
       <div id="history-container" style="flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px;">
@@ -128,14 +136,14 @@
           Create stunning cinematic videos using a node-based workflow canvas. Connect a starting image node to a video generator node.
         </p>
         <div style="display:flex; flex-direction:column; gap:8px;">
-          <button class="ref-add-btn" style="border-color:rgba(16,185,129,0.3); color:#10b981; background:rgba(16,185,129,0.04);" onclick="videoWorkflowAddNode('image')">
+          <button class="ref-add-btn" style="border-color:rgba(16,185,129,0.3); color:#10b981; background:rgba(16,185,129,0.04);" data-sg-click="action8">
             + Add Image Node
           </button>
-          <button class="ref-add-btn" style="border-color:rgba(217,70,239,0.3); color:#d946ef; background:rgba(217,70,239,0.04);" onclick="videoWorkflowAddNode('video')">
+          <button class="ref-add-btn" style="border-color:rgba(217,70,239,0.3); color:#d946ef; background:rgba(217,70,239,0.04);" data-sg-click="action9">
             + Add Video Node
           </button>
           <div style="border-top:1px solid rgba(255,255,255,0.05); margin:8px 0;"></div>
-          <button class="upload-capture-btn" style="background:rgba(255,79,112,0.08); border-color:rgba(255,79,112,0.2); color:#ff4f70;" onclick="resetWorkflowCanvas()">
+          <button class="upload-capture-btn" style="background:rgba(255,79,112,0.08); border-color:rgba(255,79,112,0.2); color:#ff4f70;" data-sg-click="action10">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             Reset Workspace
           </button>
@@ -151,57 +159,14 @@
     -->
 
     <!-- ── 3D TAB ─────────────────────────── -->
-    <div id="tab-3d" class="tab-content">
-      <div class="control-group">
-        <p class="group-title">3D Asset Guide</p>
-        <div class="i3d-guide-list">
-          <div class="i3d-guide-item">
-            <div class="i3d-guide-num">01</div>
-            <div class="i3d-guide-text">
-              <strong>Contrast Background</strong>
-              <span>Use solid or transparent backgrounds for cleaner shapes.</span>
-            </div>
-          </div>
-          <div class="i3d-guide-item">
-            <div class="i3d-guide-num">02</div>
-            <div class="i3d-guide-text">
-              <strong>Uncropped Subject</strong>
-              <span>Ensure the entire object is visible and inside the frame.</span>
-            </div>
-          </div>
-          <div class="i3d-guide-item">
-            <div class="i3d-guide-num">03</div>
-            <div class="i3d-guide-text">
-              <strong>Lighting & Focus</strong>
-              <span>Avoid blurry details, heavy shadows, or strong reflections.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Collapsible Server Settings -->
-      <details style="margin-top: 14px; font-size: 11px;">
-        <summary style="cursor: pointer; color: var(--text-muted); font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; list-style: none; display: flex; align-items: center; gap: 6px; user-select: none;">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Server Settings
-        </summary>
-        <div style="margin-top: 8px; border: 1px solid rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 6px; background: rgba(0,0,0,0.2);">
-          <div class="i3d-server-row">
-            <input class="i3d-server-input" type="text" id="i3d-server-url" value="https://sketchupgurus-ai-server.onrender.com" placeholder="https://sketchupgurus-ai-server.onrender.com" style="font-size: 10px; padding: 4px 6px;">
-            <button class="i3d-ping-btn" onclick="i3dPingServer()" style="font-size: 10px; padding: 4px 8px;">Ping</button>
-          </div>
-          <div class="i3d-server-pill" style="margin-top: 6px; justify-content: flex-start;"><div class="i3d-server-dot" id="i3d-server-dot"></div><span id="i3d-server-txt" style="font-size: 8px;">Not checked</span></div>
-        </div>
-      </details>
-    </div>
-
-
+    <div id="tab-3d" class="tab-content"></div>
 
   </div><!-- /.sidebar-content -->
 
   <!-- ── USER CARD ───────────────────────── -->
   <div class="sidebar-user">
     <div id="user-info-area">
-      <button class="auth-btn" onclick="document.getElementById('auth-modal').style.display='flex'">Authenticate</button>
+      <button class="auth-btn" data-sg-click="action12">Authenticate</button>
     </div>
   </div>
 </div><!-- /.sidebar -->
@@ -213,34 +178,37 @@
 <div class="main-area">
   <div class="main-header">
     <nav class="top-nav">
-      <button class="nav-btn active" id="tab-btn-studio" data-tab="studio" onclick="switchTab('studio')" data-i18n="tab_studio">
+      <button class="nav-btn active" id="tab-btn-studio" data-tab="studio" data-sg-click="action13" data-i18n="tab_studio">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         Studio
       </button>
-      <button class="nav-btn" id="tab-btn-history" data-tab="history" onclick="switchTab('history')" data-i18n="tab_projects">
+      <button class="nav-btn" id="tab-btn-history" data-tab="history" data-sg-click="action14" data-i18n="tab_projects">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
         Projects
       </button>
-      <button class="nav-btn" id="tab-btn-support" data-tab="support" onclick="switchTab('support')" data-i18n="tab_support">
+      <button class="nav-btn" id="tab-btn-support" data-tab="support" data-sg-click="action15" data-i18n="tab_support">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Support
       </button>
-      <button class="nav-btn" id="tab-btn-3d" data-tab="3d" onclick="switchTab('3d')" data-i18n="tab_3d">
+      <button class="nav-btn" id="tab-btn-3d" data-tab="3d" data-sg-click="action16" data-i18n="tab_3d">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
         Image to 3D
       </button>
       <!--
-      <button class="nav-btn" id="tab-btn-video" data-tab="video" onclick="switchTab('video')" data-i18n="tab_video">
+      <button class="nav-btn" id="tab-btn-video" data-tab="video" data-sg-click="action17" data-i18n="tab_video">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
         Studio Video
       </button>
       -->
+      <button class="nav-btn" id="tab-btn-omni" data-tab="omni" data-sg-click="action18">
+        <i data-lucide="clapperboard" aria-hidden="true"></i> Omni Studio
+      </button>
     </nav>
 
     <div class="header-actions">
       <!-- Language Selector -->
       <div class="lang-selector-container">
-        <select id="lang-selector" class="lang-select" onchange="switchLanguage(this.value)" title="Select Language">
+        <select id="lang-selector" class="lang-select" data-sg-change="action19" title="Select Language">
           <option value="en">EN</option>
           <option value="es">ES</option>
           <option value="de">DE</option>
@@ -248,14 +216,17 @@
         </select>
       </div>
       <div class="header-user-info">
-        <span id="user-email-display" onclick="showProfileModal()" title="View Profile"></span>
+        <span id="user-email-display" data-sg-click="action20" title="View Profile"></span>
         <span id="credit-counter">CONNECTING...</span>
       </div>
-      <button class="btn-buy" onclick="showPaywall()" data-i18n="btn_buy_credits">Buy Credits</button>
-      <button class="btn-secondary" style="padding:7px 12px; margin:0; width:auto;" onclick="logoutUser()" data-i18n="btn_logout">Logout</button>
+      <button class="btn-buy" data-sg-click="action21" data-i18n="btn_buy_credits">Buy Credits</button>
+      <button class="btn-secondary" style="padding:7px 12px; margin:0; width:auto;" data-sg-click="action22" data-i18n="btn_logout">Logout</button>
     </div>
   </div>
 
+  <section id="main-omni" hidden>
+    <iframe id="omni-frame" title="SGAI Omni Studio" data-src="omni/index.html?v=73f461745e6d" allow="autoplay; fullscreen"></iframe>
+  </section>
   <!-- Studio Output -->
   <div id="main-studio">
     <!-- Presets Gallery -->
@@ -266,8 +237,8 @@
           <span>Presets Gallery</span>
         </div>
         <div class="preset-filter-pills">
-          <button class="preset-filter-pill active" onclick="filterPresets('layouts')" id="pill-filter-layouts">Layouts</button>
-          <button class="preset-filter-pill" onclick="filterPresets('styles')" id="pill-filter-styles">Aesthetics</button>
+          <button class="preset-filter-pill active" data-sg-click="action23" id="pill-filter-layouts">Layouts</button>
+          <button class="preset-filter-pill" data-sg-click="action24" id="pill-filter-styles">Aesthetics</button>
         </div>
       </div>
       <div class="presets-cards" id="presets-cards-container">
@@ -300,23 +271,23 @@
       <div>
         <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;" data-i18n="vsource_header">Image Source</div>
         <div class="vid-src-tabs">
-          <div class="vid-src-tab active" id="vsrc-tab-capture" onclick="vidSrcSwitch('capture')" data-i18n="vsrc_capture">Capture</div>
-          <div class="vid-src-tab" id="vsrc-tab-upload" onclick="vidSrcSwitch('upload')" data-i18n="vsrc_upload">Upload</div>
-          <div class="vid-src-tab" id="vsrc-tab-history" onclick="vidSrcSwitch('history')" data-i18n="vsrc_history">History</div>
+          <div class="vid-src-tab active" id="vsrc-tab-capture" data-sg-click="action25" data-i18n="vsrc_capture">Capture</div>
+          <div class="vid-src-tab" id="vsrc-tab-upload" data-sg-click="action26" data-i18n="vsrc_upload">Upload</div>
+          <div class="vid-src-tab" id="vsrc-tab-history" data-sg-click="action27" data-i18n="vsrc_history">History</div>
         </div>
         <div id="vsrc-upload-area" style="display:none; margin-top:8px;">
-          <div class="vid-upload-zone" onclick="document.getElementById('vid-img-file').click()">
+          <div class="vid-upload-zone" data-sg-click="action28">
             <span style="font-family:var(--font-mono); font-size:9px; color:#6b8aaa;" id="vid-upload-lbl" data-i18n="vsrc_upload_label">Click to upload image</span>
           </div>
-          <input type="file" id="vid-img-file" hidden accept=".jpg,.jpeg,.png,.webp" onchange="vidHandleUpload(event)">
+          <input type="file" id="vid-img-file" hidden accept=".jpg,.jpeg,.png,.webp" data-sg-change="action29">
           <div id="vid-upload-preview" class="vid-img-preview" style="display:none; margin-top:6px;">
-            <img id="vid-upload-img" src="" alt=""><button class="vid-img-preview-clear" onclick="vidClearUpload()">x</button>
+            <img id="vid-upload-img" src="" alt=""><button class="vid-img-preview-clear" data-sg-click="action30">x</button>
           </div>
         </div>
         <div id="vsrc-history-area" style="display:none; margin-top:8px;">
           <div class="vid-hist-grid" id="vid-hist-grid"></div>
           <div id="vid-hist-selected-wrap" style="display:none; margin-top:6px;">
-            <div class="vid-img-preview"><img id="vid-hist-selected-img" src="" alt=""><button class="vid-img-preview-clear" onclick="vidClearHistoryPick()">x</button></div>
+            <div class="vid-img-preview"><img id="vid-hist-selected-img" src="" alt=""><button class="vid-img-preview-clear" data-sg-click="action31">x</button></div>
           </div>
         </div>
       </div>
@@ -324,23 +295,23 @@
       <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
         <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Ending Image (Interpolation - Optional)</div>
         <div class="vid-src-tabs">
-          <div class="vid-src-tab active" id="vsrc-end-tab-none" onclick="vidEndSrcSwitch('none')">None</div>
-          <div class="vid-src-tab" id="vsrc-end-tab-upload" onclick="vidEndSrcSwitch('upload')">Upload</div>
-          <div class="vid-src-tab" id="vsrc-end-tab-history" onclick="vidEndSrcSwitch('history')">History</div>
+          <div class="vid-src-tab active" id="vsrc-end-tab-none" data-sg-click="action32">>None</div>
+          <div class="vid-src-tab" id="vsrc-end-tab-upload" data-sg-click="action33">>Upload</div>
+          <div class="vid-src-tab" id="vsrc-end-tab-history" data-sg-click="action34">>History</div>
         </div>
         <div id="vsrc-end-upload-area" style="display:none; margin-top:8px;">
-          <div class="vid-upload-zone" onclick="document.getElementById('vid-end-img-file').click()">
+          <div class="vid-upload-zone" data-sg-click="action35">
             <span style="font-family:var(--font-mono); font-size:9px; color:#6b8aaa;" id="vid-end-upload-lbl">Click to upload end image</span>
           </div>
-          <input type="file" id="vid-end-img-file" hidden accept=".jpg,.jpeg,.png,.webp" onchange="vidHandleEndFrameUpload(event)">
+          <input type="file" id="vid-end-img-file" hidden accept=".jpg,.jpeg,.png,.webp" data-sg-change="action36">
           <div id="vid-end-upload-preview" class="vid-img-preview" style="display:none; margin-top:6px;">
-            <img id="vid-end-upload-img" src="" alt=""><button class="vid-img-preview-clear" onclick="vidClearEndFrame()">x</button>
+            <img id="vid-end-upload-img" src="" alt=""><button class="vid-img-preview-clear" data-sg-click="action37">x</button>
           </div>
         </div>
         <div id="vsrc-end-history-area" style="display:none; margin-top:8px;">
           <div class="vid-end-hist-grid" id="vid-end-hist-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; max-height:220px; overflow-y:auto;"></div>
           <div id="vid-end-hist-selected-wrap" style="display:none; margin-top:6px;">
-            <div class="vid-img-preview"><img id="vid-end-hist-selected-img" src="" alt=""><button class="vid-img-preview-clear" onclick="vidClearEndHistoryPick()">x</button></div>
+            <div class="vid-img-preview"><img id="vid-end-hist-selected-img" src="" alt=""><button class="vid-img-preview-clear" data-sg-click="action38">x</button></div>
           </div>
         </div>
       </div>
@@ -348,50 +319,50 @@
       <div>
         <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Camera Motion</div>
         <div class="cam-grid">
-          <div class="cam-pill selected" onclick="vidSelectCam(this,'none')">Static</div>
-          <div class="cam-pill" onclick="vidSelectCam(this,'dolly_forward')">Dolly In</div>
-          <div class="cam-pill" onclick="vidSelectCam(this,'dolly_backward')">Dolly Out</div>
-          <div class="cam-pill" onclick="vidSelectCam(this,'pan_left')">Pan Left</div>
-          <div class="cam-pill" onclick="vidSelectCam(this,'pan_right')">Pan Right</div>
-          <div class="cam-pill" onclick="vidSelectCam(this,'tilt_up')">Tilt Up</div>
-          <div class="cam-pill" onclick="vidSelectCam(this,'tilt_down')">Tilt Down</div>
-          <div class="cam-pill" onclick="vidSelectCam(this,'orbit_left')">Orbit L</div>
-          <div class="cam-pill" onclick="vidSelectCam(this,'orbit_right')">Orbit R</div>
+          <div class="cam-pill selected" data-sg-click="action39" data-camera="none">>Static</div>
+          <div class="cam-pill" data-sg-click="action40" data-camera="dolly_forward">>Dolly In</div>
+          <div class="cam-pill" data-sg-click="action41" data-camera="dolly_backward">>Dolly Out</div>
+          <div class="cam-pill" data-sg-click="action42" data-camera="pan_left">>Pan Left</div>
+          <div class="cam-pill" data-sg-click="action43" data-camera="pan_right">>Pan Right</div>
+          <div class="cam-pill" data-sg-click="action44" data-camera="tilt_up">>Tilt Up</div>
+          <div class="cam-pill" data-sg-click="action45" data-camera="tilt_down">>Tilt Down</div>
+          <div class="cam-pill" data-sg-click="action46" data-camera="orbit_left">>Orbit L</div>
+          <div class="cam-pill" data-sg-click="action47" data-camera="orbit_right">>Orbit R</div>
         </div>
       </div>
 
       <div>
         <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Aspect Ratio</div>
         <div class="vid-ar-pills" style="display:flex; gap:6px;">
-          <div class="vid-ar-pill selected" onclick="vidSelectAR(this,'16:9')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">16:9</div>
-          <div class="vid-ar-pill" onclick="vidSelectAR(this,'9:16')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">9:16</div>
-          <div class="vid-ar-pill" onclick="vidSelectAR(this,'1:1')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">1:1</div>
+          <div class="vid-ar-pill selected" data-sg-click="action48" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">16:9</div>
+          <div class="vid-ar-pill" data-sg-click="action49" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">9:16</div>
+          <div class="vid-ar-pill" data-sg-click="action50" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">1:1</div>
         </div>
       </div>
 
       <div>
         <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Motion Speed</div>
         <div class="vid-speed-pills" style="display:flex; gap:6px;">
-          <div class="vid-speed-pill" onclick="vidSelectSpeed(this,'low')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">Low</div>
-          <div class="vid-speed-pill selected" onclick="vidSelectSpeed(this,'medium')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">Medium</div>
-          <div class="vid-speed-pill" onclick="vidSelectSpeed(this,'high')" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">High</div>
+          <div class="vid-speed-pill" data-sg-click="action51" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">Low</div>
+          <div class="vid-speed-pill selected" data-sg-click="action52" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">Medium</div>
+          <div class="vid-speed-pill" data-sg-click="action53" style="flex:1; text-align:center; padding:6px 0; border:1px solid rgba(217,70,239,0.15); border-radius:5px; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); cursor:pointer; transition:0.2s;">High</div>
         </div>
       </div>
 
       <div>
         <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Duration</div>
         <div class="vid-dur-pills">
-          <div class="vid-dur-pill" onclick="vidSelectDur(this,4)">4 sec</div>
-          <div class="vid-dur-pill selected" onclick="vidSelectDur(this,6)">6 sec</div>
-          <div class="vid-dur-pill" onclick="vidSelectDur(this,8)">8 sec</div>
+          <div class="vid-dur-pill" data-sg-click="action54">>4 sec</div>
+          <div class="vid-dur-pill selected" data-sg-click="action55">>6 sec</div>
+          <div class="vid-dur-pill" data-sg-click="action56">>8 sec</div>
         </div>
       </div>
 
       <div>
         <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Resolution</div>
         <div class="vid-res-pills">
-          <div class="vid-res-pill selected" onclick="vidSelectRes(this,'720p')">720p</div>
-          <div class="vid-res-pill" onclick="vidSelectRes(this,'1080p')">1080p</div>
+          <div class="vid-res-pill selected" data-sg-click="action57">>720p</div>
+          <div class="vid-res-pill" data-sg-click="action58">>1080p</div>
         </div>
       </div>
 
@@ -409,19 +380,19 @@
       <div>
         <div style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;" data-i18n="vpreset_header">Cinematic Motion Presets</div>
         <div class="video-presets-gallery" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; scrollbar-width:thin;">
-          <div class="video-preset-card" data-id="drone" onclick="selectVideoPreset('drone')" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_drone.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
+          <div class="video-preset-card" data-id="drone" data-sg-click="action59" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_drone.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
             <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);"></div>
             <span style="position:absolute; bottom:6px; left:6px; font-family:var(--font-mono); font-size:8px; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.8);" data-i18n="vpreset_drone">Drone Orbit</span>
           </div>
-          <div class="video-preset-card" data-id="timelapse" onclick="selectVideoPreset('timelapse')" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_timelapse.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
+          <div class="video-preset-card" data-id="timelapse" data-sg-click="action60" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_timelapse.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
             <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);"></div>
             <span style="position:absolute; bottom:6px; left:6px; font-family:var(--font-mono); font-size:8px; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.8);" data-i18n="vpreset_timelapse">Timelapse Sunset</span>
           </div>
-          <div class="video-preset-card" data-id="walkthrough" onclick="selectVideoPreset('walkthrough')" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_walkthrough.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
+          <div class="video-preset-card" data-id="walkthrough" data-sg-click="action61" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_walkthrough.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
             <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);"></div>
             <span style="position:absolute; bottom:6px; left:6px; font-family:var(--font-mono); font-size:8px; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.8);" data-i18n="vpreset_walkthrough">Walkthrough</span>
           </div>
-          <div class="video-preset-card" data-id="dolly" onclick="selectVideoPreset('dolly')" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_dolly.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
+          <div class="video-preset-card" data-id="dolly" data-sg-click="action62" style="flex:0 0 100px; height:60px; border-radius:6px; background-image:url('assets/v_dolly.png'); background-size:cover; background-position:center; position:relative; cursor:pointer; overflow:hidden; border:1px solid rgba(255,255,255,0.08); transition:0.2s;">
             <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);"></div>
             <span style="position:absolute; bottom:6px; left:6px; font-family:var(--font-mono); font-size:8px; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.8);" data-i18n="vpreset_dolly">Dolly In</span>
           </div>
@@ -433,7 +404,7 @@
         <textarea id="vid-motion-prompt" placeholder="e.g. slow cinematic flythrough, warm light..." style="width:100%; background:var(--input-bg); border:1px solid rgba(217,70,239,0.2); border-radius:6px; color:var(--text-main); padding:8px 10px; font-family:var(--font-mono); font-size:10px; resize:vertical; outline:none; min-height:52px; margin-bottom:10px;" data-i18n="vprompt_label"></textarea>
       </div>
 
-      <button id="btn-video-run-trigger" onclick="startVideoRender()" style="width:100%; padding:12px; border:none; border-radius:8px; cursor:pointer; font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#fff; background:linear-gradient(135deg,rgba(217,70,239,0.9),rgba(162,28,175,0.95)); box-shadow:0 4px 18px rgba(217,70,239,0.35); transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px;">
+      <button id="btn-video-run-trigger" data-sg-click="action63" style="width:100%; padding:12px; border:none; border-radius:8px; cursor:pointer; font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#fff; background:linear-gradient(135deg,rgba(217,70,239,0.9),rgba(162,28,175,0.95)); box-shadow:0 4px 18px rgba(217,70,239,0.35); transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px;">
         <span data-i18n="btn_video_run">Run Video Render</span> (10 CR)
       </button>
     </div>
@@ -443,173 +414,7 @@
 
 
   <!-- 3D Generator Output -->
-  <div id="main-3d">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid var(--border-color);">
-      <div style="font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:2px; color:#ffffff; text-transform:uppercase;">Image to 3D Generator</div>
-      <div class="i3d-credit-badge" style="margin-bottom:0;">Cost: <span id="i3d-cost-num">10</span> CR</div>
-    </div>
-
-
-
-    <!-- Hidden Select Elements for JS Compatibility -->
-    <select class="i3d-select" id="i3d-model" style="display:none;">
-      <option value="meshy-6">Engine 6</option>
-      <option value="meshy-5">Engine 5</option>
-    </select>
-    <select class="i3d-select" id="i3d-topology" style="display:none;">
-      <option value="quad">Quad</option>
-      <option value="triangle">Triangle</option>
-    </select>
-    <select class="i3d-select" id="i3d-polycount" style="display:none;">
-      <option value="30000">30k</option>
-      <option value="50000" selected>50k</option>
-      <option value="100000">100k</option>
-      <option value="200000">200k</option>
-    </select>
-    <select class="i3d-select" id="i3d-pose" style="display:none;">
-      <option value="">None</option>
-      <option value="a-pose">A-Pose</option>
-      <option value="t-pose">T-Pose</option>
-    </select>
-
-    <div class="i3d-workspace-grid">
-      <!-- Left Column: Source Upload & Previews -->
-      <div class="i3d-workspace-col">
-        <div class="control-group" style="background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.04); margin-bottom: 0;">
-          <p class="group-title" style="margin-bottom: 10px;">Select Source Image</p>
-          <div class="i3d-mode-pills" style="margin-bottom: 12px;">
-            <button class="i3d-mode-pill active" id="i3d-pill-single" onclick="i3dSwitchMode('single')">Single Image</button>
-            <button class="i3d-mode-pill" id="i3d-pill-multi" onclick="i3dSwitchMode('multi')">Multi-View (4 Angles)</button>
-          </div>
-          
-          <!-- Sticky Tip Info Box -->
-          <div class="i3d-upload-tip" style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px; background: rgba(239, 35, 60, 0.06); border: 1px solid rgba(239, 35, 60, 0.2); padding: 8px 12px; border-radius: 6px; font-family: var(--font-mono); font-size: 9px; line-height: 1.4; color: #ffffff;">
-            <span style="font-size: 11px; flex-shrink: 0; line-height: 1;">💡</span>
-            <span>Best 3D model produced only if image is white background or transparent.</span>
-          </div>
-
-          <div id="i3d-single-wrap">
-            <div class="i3d-drop" id="i3d-dropzone" onclick="document.getElementById('i3d-file-single').click()" ondragover="i3dDragOver(event)" ondragleave="i3dDragLeave(event)" ondrop="i3dDrop(event)" style="min-height: 120px;">
-              <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 28px; height: 28px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <span class="dz-label" id="i3d-dz-label" style="font-size: 10px;">Upload Image</span>
-              <span class="dz-sub" style="font-size: 8px;">JPG, PNG - Max 20MB</span>
-            </div>
-            
-            <input type="file" id="i3d-file-single" hidden accept=".jpg,.jpeg,.png" onchange="i3dHandleFile(event,'single')">
-            <div class="i3d-prev-wrap" id="i3d-prev-single" style="display:none; margin-top:12px; position:relative; overflow:hidden;">
-              <div class="i3d-image-preview-container">
-                <img id="i3d-prev-single-img" src="" alt="">
-              </div>
-              <button class="i3d-prev-clear" onclick="i3dClearSingle()">x</button>
-              <button class="i3d-remove-bg-btn" id="i3d-remove-bg-btn" onclick="i3dRemoveBackground()" style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); border:1px solid var(--accent-primary); color:#ffffff; font-family:var(--font-mono); font-size:9px; padding:4px 8px; border-radius:4px; cursor:pointer; display:flex; align-items:center; gap:4px; z-index:10; white-space:nowrap; outline:none;">
-                <span>🧼</span> Remove BG (0.2 CR)
-              </button>
-            </div>
-          </div>
-          
-          <div id="i3d-multi-wrap" style="display:none;">
-            <p style="font-family:var(--font-mono); font-size:9px; color:#6b8aaa; margin-bottom:10px;">Upload up to 4 angles of the same object</p>
-            <div class="i3d-slots" id="i3d-slots"></div>
-            <input type="file" id="i3d-file-multi" hidden accept=".jpg,.jpeg,.png" onchange="i3dHandleFile(event,'multi')">
-          </div>
-        </div>
-
-        <!-- Result Area (Progress, 3D Model, Errors) inside Left Column! -->
-        <div id="i3d-result-area" style="margin-top:0px; display:none;">
-          <div class="i3d-progress-card" id="i3d-progress-card" style="display:none; margin-bottom: 0;">
-            <div class="i3d-progress-header"><div><div style="font-size:9px; color:#6b8aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Task ID</div><div class="i3d-task-id" id="i3d-task-id">-</div></div><span class="i3d-status-badge pending" id="i3d-status-badge">Pending</span></div>
-            <div class="i3d-progress-msg"><div class="i3d-pulse" id="i3d-pulse"></div><span id="i3d-progress-msg">Waiting in queue...</span></div>
-            <div class="i3d-bar-track"><div class="i3d-bar-fill" id="i3d-bar-fill" style="width:0%"></div></div>
-            <div class="i3d-bar-pct" id="i3d-bar-pct">0%</div>
-          </div>
-          <div class="i3d-model-card" id="i3d-model-card" style="display:none; margin-bottom: 0; position: relative;">
-            <div class="i3d-thumb" id="i3d-thumb"><div class="i3d-thumb-empty">No preview</div></div>
-            
-            <!-- Viewer Toolbar Overlay -->
-            <div id="i3d-viewer-toolbar" style="position: absolute; top: 12px; right: 12px; z-index: 100; display: none; gap: 6px; background: rgba(10, 14, 20, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 4px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-              <button onclick="i3dToggleViewerRotation()" class="i3d-ctrl-btn" title="Toggle Auto Rotation">
-                <span id="i3d-rotate-btn-icon">⏸</span> <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">Rotate</span>
-              </button>
-              <button onclick="i3dCycleViewerLighting()" class="i3d-ctrl-btn" title="Cycle Lighting">
-                <span id="i3d-light-btn-icon">☀️</span> <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">Light</span>
-              </button>
-              <button onclick="i3dResetViewerCamera()" class="i3d-ctrl-btn" title="Reset Camera">
-                <span id="i3d-reset-btn-icon">🎯</span> <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">Reset</span>
-              </button>
-              <button onclick="i3dToggleViewerWireframe()" class="i3d-ctrl-btn" title="Toggle Mesh Wireframe">
-                <span id="i3d-wireframe-btn-icon">🕸️</span> <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">Wireframe</span>
-              </button>
-            </div>
-            <div class="i3d-model-info">
-              <div class="i3d-model-title">Model Generated</div>
-              <div class="i3d-model-meta" id="i3d-model-meta">-</div>
-              <div class="i3d-dl-grid" id="i3d-dl-grid"></div>
-              <button class="i3d-skp-btn" id="i3d-skp-btn" onclick="i3dImportSKP()" disabled style="width: 100%;" data-i18n="btn_skp_import">Import GLB into SketchUp</button>
-              <div class="i3d-skp-status" id="i3d-skp-status"></div>
-            </div>
-          </div>
-          <div class="i3d-error" id="i3d-error-area" style="display:none;"><span>!</span><span id="i3d-error-txt">Error</span></div>
-        </div>
-      </div>
-
-      <!-- Right Column: Settings & Custom Controls -->
-      <div class="i3d-workspace-col">
-        <div class="control-group" style="background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.04); margin-bottom: 0;">
-          <p class="group-title" style="margin-bottom: 12px;">Model Parameters</p>
-          
-          <div class="i3d-controls-grid">
-            <div class="i3d-control-item">
-              <label class="field-label" style="font-size:9px; margin-bottom: 4px;">AI Model</label>
-              <div class="segmented-control">
-                <button type="button" class="segment-btn active" onclick="selectSegment('i3d-model', 'meshy-6', this)">Engine 6</button>
-                <button type="button" class="segment-btn" onclick="selectSegment('i3d-model', 'meshy-5', this)">Engine 5</button>
-              </div>
-            </div>
-            
-            <div class="i3d-control-item">
-              <label class="field-label" style="font-size:9px; margin-bottom: 4px;">Topology</label>
-              <div class="segmented-control">
-                <button type="button" class="segment-btn active" onclick="selectSegment('i3d-topology', 'quad', this)">Quad</button>
-                <button type="button" class="segment-btn" onclick="selectSegment('i3d-topology', 'triangle', this)">Triangle</button>
-              </div>
-            </div>
-            
-            <div class="i3d-control-item">
-              <label class="field-label" style="font-size:9px; margin-bottom: 4px;">Poly Count</label>
-              <div class="segmented-control">
-                <button type="button" class="segment-btn" onclick="selectSegment('i3d-polycount', '30000', this)">30k</button>
-                <button type="button" class="segment-btn active" onclick="selectSegment('i3d-polycount', '50000', this)">50k</button>
-                <button type="button" class="segment-btn" onclick="selectSegment('i3d-polycount', '100000', this)">100k</button>
-                <button type="button" class="segment-btn" onclick="selectSegment('i3d-polycount', '200000', this)">200k</button>
-              </div>
-            </div>
-            
-            <div class="i3d-control-item">
-              <label class="field-label" style="font-size:9px; margin-bottom: 4px;">Pose Preset</label>
-              <div class="segmented-control">
-                <button type="button" class="segment-btn active" onclick="selectSegment('i3d-pose', '', this)">None</button>
-                <button type="button" class="segment-btn" onclick="selectSegment('i3d-pose', 'a-pose', this)">A-Pose</button>
-                <button type="button" class="segment-btn" onclick="selectSegment('i3d-pose', 't-pose', this)">T-Pose</button>
-              </div>
-            </div>
-          </div>
-
-          <div style="display:flex; gap:10px; margin-top: 14px; margin-bottom: 12px; flex-wrap:wrap;">
-            <div class="i3d-toggle-row" style="flex:1; min-width:140px; padding:6px 10px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.04); border-radius:6px;"><div class="i3d-toggle-info"><strong>Textures</strong><span>+5 CR</span></div><button class="i3d-toggle on" id="i3d-tog-texture" onclick="i3dToggle('texture')"></button></div>
-            <div class="i3d-toggle-row" id="i3d-pbr-row" style="flex:1; min-width:140px; padding:6px 10px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.04); border-radius:6px;"><div class="i3d-toggle-info"><strong>PBR Maps</strong><span>+3 CR</span></div><button class="i3d-toggle on" id="i3d-tog-pbr" onclick="i3dToggle('pbr')"></button></div>
-            <div class="i3d-toggle-row" style="flex:1; min-width:140px; padding:6px 10px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.04); border-radius:6px;"><div class="i3d-toggle-info"><strong>Remesh</strong><span>Optimise</span></div><button class="i3d-toggle on" id="i3d-tog-remesh" onclick="i3dToggle('remesh')"></button></div>
-          </div>
-
-          <div id="i3d-prompt-wrap" style="margin-bottom:0;"><label class="field-label" style="font-size:9px; margin-bottom: 4px;">Texture Prompt (optional)</label><textarea id="i3d-tex-prompt" placeholder="e.g. worn leather, rusted metal..." style="width:100%; background:var(--input-bg); border:1px solid rgba(230,51,41,0.15); border-radius:6px; color:var(--text-main); padding:6px 10px; font-family:var(--font-mono); font-size:10px; resize:vertical; outline:none; min-height:46px;"></textarea></div>
-        </div>
-
-        <button class="i3d-generate-btn" id="i3d-gen-btn" onclick="i3dGenerate()" style="margin-top: 0px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-          <span data-i18n="btn_3d_run">Generate 3D Model</span>
-        </button>
-      </div>
-    </div>
-  </div>
+  <div id="main-3d"><iframe id="tripo-frame" title="Tripo Image to 3D" data-src="tripo/index.html?v=7cbfa74c5e18"></iframe></div>
 </div><!-- /.main-area -->
 
 
@@ -704,13 +509,7 @@
           <label class="field-label" style="margin-bottom:0;">Geometry Lock</label>
           <span id="geometry-lock-val" style="font-size:9px; color:var(--accent-gold); font-weight:700; font-family:var(--font-mono);">STRICT</span>
         </div>
-        <input type="range" id="geometry-lock" min="0" max="100" value="0" oninput="
-          const val = this.value;
-          const label = document.getElementById('geometry-lock-val');
-          if(val < 33) { label.innerText = 'STRICT'; label.style.color = 'var(--accent-gold)'; }
-          else if(val < 66) { label.innerText = 'BALANCED'; label.style.color = 'var(--accent-primary)'; }
-          else { label.innerText = 'CREATIVE'; label.style.color = 'var(--accent-green)'; }
-        ">
+        <input type="range" id="geometry-lock" min="0" max="100" value="0" data-sg-input="action91">
       </div>
     </div>
 
@@ -718,10 +517,10 @@
       <p class="group-title">5. Render Quality</p>
       <div class="input-group" style="margin-bottom:0;">
         <div class="pill-group" style="display:flex; gap:6px;">
-          <div id="pill-hd" onclick="selectQuality('hd')" class="pill-label" style="background:rgba(239,35,60,0.15); border-color:var(--accent-primary); color:#ffffff; box-shadow:0 0 12px rgba(239,35,60,0.25); font-weight:700;">
+          <div id="pill-hd" data-sg-click="action92" class="pill-label" style="background:rgba(239,35,60,0.15); border-color:var(--accent-primary); color:#ffffff; box-shadow:0 0 12px rgba(239,35,60,0.25); font-weight:700;">
             HD &nbsp;<span style="font-size:0.8em; font-weight:900;">1 CR</span>
           </div>
-          <div id="pill-4k" onclick="selectQuality('4k')" class="pill-label" style="display:none;">
+          <div id="pill-4k" data-sg-click="action93" class="pill-label" style="display:none;">
             4K &nbsp;<span style="font-size:0.8em; font-weight:900;">4 CR</span>
           </div>
           <input type="radio" id="quality-hd" name="render_quality" value="hd" checked style="display:none;">
@@ -732,11 +531,11 @@
     </div>
 
     <div class="render-actions" style="display:flex; flex-direction:column; gap:8px;">
-      <button id="main-render-btn" onclick="startRender()" style="width: 100%;">
+      <button id="main-render-btn" data-sg-click="action94" style="width: 100%;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
         <span data-i18n="btn_generate">Run AI Rendering</span> (<span id="render-btn-label">1 CR</span>)
       </button>
-      <button id="batch-render-btn" onclick="window.openBatchRenderModal()" style="width: 100%; padding: 12px; border: 1px dashed rgba(239, 35, 60, 0.4); border-radius: 8px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #ffffff; background: rgba(239, 35, 60, 0.08); box-shadow: 0 4px 18px rgba(239, 35, 60, 0.1); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+      <button id="batch-render-btn" data-sg-click="action95" style="width: 100%; padding: 12px; border: 1px dashed rgba(239, 35, 60, 0.4); border-radius: 8px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #ffffff; background: rgba(239, 35, 60, 0.08); box-shadow: 0 4px 18px rgba(239, 35, 60, 0.1); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         <span data-i18n="btn_batch">Batch Render</span>
       </button>
@@ -759,7 +558,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <h2>Operator Profile</h2>
       </div>
-      <button class="modal-close" onclick="hideProfileModal()">&times;</button>
+      <button class="modal-close" data-sg-click="action96">&times;</button>
     </div>
     <div class="modal-body">
       <div class="profile-identity">
@@ -788,10 +587,10 @@
           <div class="credits-value"><span id="profile-modal-credits">0</span> <span>credits left</span></div>
           <div class="credits-bar-track"><div class="credits-bar-fill"></div></div>
           <div class="credits-bar-meta"><span>Live Sync Active</span><span>Recharge Available</span></div>
-          <button class="profile-upgrade-btn" onclick="hideProfileModal(); showPaywall();">👑 Upgrade Plan</button>
+          <button class="profile-upgrade-btn" data-sg-click="action97">👑 Upgrade Plan</button>
         </div>
       </div>
-      <button class="profile-logout-btn" onclick="logoutUser(); hideProfileModal();">Terminate Session</button>
+      <button class="profile-logout-btn" data-sg-click="action98">Terminate Session</button>
     </div>
   </div>
 </div>
@@ -809,8 +608,8 @@
         <div class="auth-sub">SketchupGurus AI — Render Engine v3</div>
       </div>
       <div class="auth-tabs">
-        <button class="auth-tab active" id="tab-login" onclick="toggleAuthMode('login')">Login</button>
-        <button class="auth-tab" id="tab-signup" onclick="toggleAuthMode('signup')">Sign Up</button>
+        <button class="auth-tab active" id="tab-login" data-sg-click="action99">Login</button>
+        <button class="auth-tab" id="tab-signup" data-sg-click="action100">Sign Up</button>
       </div>
       <div class="form-field">
         <label class="form-label">Email Address</label>
@@ -824,7 +623,7 @@
         <label class="form-label gold">Verification Code (OTP)</label>
         <input type="text" id="auth-otp" class="otp-input" placeholder="123456" maxlength="6">
       </div>
-      <button id="auth-action-btn" class="auth-action-btn" onclick="submitAuth()">Login to Account</button>
+      <button id="auth-action-btn" class="auth-action-btn" data-sg-click="action101">Login to Account</button>
 
       <!-- Google Sign-In -->
       <div id="google-signin-wrapper" style="margin: 16px 0 8px; text-align: center; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px;">
@@ -846,7 +645,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-gold);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         <h2 style="color:var(--accent-gold);">Upgrade Compute</h2>
       </div>
-      <button class="modal-close" onclick="hidePaywall()">&times;</button>
+      <button class="modal-close" data-sg-click="action102">&times;</button>
     </div>
     <div class="modal-body">
       <div class="paywall-header-icon">
@@ -858,7 +657,7 @@
       <!-- Currency Selector -->
       <div class="paywall-currency-container">
         <span class="paywall-currency-label">Display Currency</span>
-        <select id="paywall-currency" class="paywall-currency-select" onchange="updatePaywallPrices()">
+        <select id="paywall-currency" class="paywall-currency-select" data-sg-change="action103">
           <option value="USD">USD ($)</option>
           <option value="EUR">EUR (€)</option>
           <option value="INR">INR (₹)</option>
@@ -868,33 +667,33 @@
       </div>
 
       <div class="paywall-tiers">
-        <div class="price-tier" onclick="payWithRazorpay('starter')">
-          <div class="price-tier-renders">11</div>
+        <div class="price-tier" data-sg-click="action104">
+          <div class="price-tier-renders">21</div>
           <div class="price-tier-label">Credits · Starter</div>
           <div class="price-tier-price" id="price-starter" data-usd="5.00">$5.00 USD</div>
-          <button class="copy-link-btn" onclick="copyPaymentLink(event, 'starter')" style="margin-top: 10px; font-family: var(--font-mono); font-size: 8px; background: rgba(239, 35, 60, 0.08); border: 1px solid rgba(239, 35, 60, 0.25); color: #ffffff; padding: 5px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; outline: none; width: 100%; position: relative; z-index: 10; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+          <button class="copy-link-btn" data-sg-click="action105" style="margin-top: 10px; font-family: var(--font-mono); font-size: 8px; background: rgba(239, 35, 60, 0.08); border: 1px solid rgba(239, 35, 60, 0.25); color: #ffffff; padding: 5px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; outline: none; width: 100%; position: relative; z-index: 10; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
             Copy Link
           </button>
         </div>
-        <div class="price-tier featured" onclick="payWithRazorpay('pro')">
+        <div class="price-tier featured" data-sg-click="action106">
           <div class="price-tier-badge">Popular</div>
-          <div class="price-tier-renders">41</div>
+          <div class="price-tier-renders">50</div>
           <div class="price-tier-label">Credits · Pro</div>
           <div class="price-tier-price" id="price-pro" data-usd="11.00">$11.00 USD</div>
-          <button class="copy-link-btn" onclick="copyPaymentLink(event, 'pro')" style="margin-top: 10px; font-family: var(--font-mono); font-size: 8px; background: rgba(239, 35, 60, 0.08); border: 1px solid rgba(239, 35, 60, 0.25); color: #ffffff; padding: 5px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; outline: none; width: 100%; position: relative; z-index: 10; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+          <button class="copy-link-btn" data-sg-click="action107" style="margin-top: 10px; font-family: var(--font-mono); font-size: 8px; background: rgba(239, 35, 60, 0.08); border: 1px solid rgba(239, 35, 60, 0.25); color: #ffffff; padding: 5px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; outline: none; width: 100%; position: relative; z-index: 10; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
             Copy Link
           </button>
         </div>
-        <div class="price-tier" onclick="payWithRazorpay('studio')">
-          <div class="price-tier-renders">151</div>
+        <div class="price-tier" data-sg-click="action108">
+          <div class="price-tier-renders">211</div>
           <div class="price-tier-label">Credits · Studio</div>
           <div class="price-tier-price" id="price-studio" data-usd="41.00">$41.00 USD</div>
-          <button class="copy-link-btn" onclick="copyPaymentLink(event, 'studio')" style="margin-top: 10px; font-family: var(--font-mono); font-size: 8px; background: rgba(239, 35, 60, 0.08); border: 1px solid rgba(239, 35, 60, 0.25); color: #ffffff; padding: 5px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; outline: none; width: 100%; position: relative; z-index: 10; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+          <button class="copy-link-btn" data-sg-click="action109" style="margin-top: 10px; font-family: var(--font-mono); font-size: 8px; background: rgba(239, 35, 60, 0.08); border: 1px solid rgba(239, 35, 60, 0.25); color: #ffffff; padding: 5px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; outline: none; width: 100%; position: relative; z-index: 10; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
             Copy Link
           </button>
         </div>
       </div>
-      <button class="paywall-back-btn" onclick="hidePaywall()">Return to Workspace</button>
+      <button class="paywall-back-btn" data-sg-click="action110">Return to Workspace</button>
     </div>
   </div>
 </div>
@@ -908,13 +707,13 @@
   <div class="toolbar-divider"></div>
   <input class="toolbar-input" id="inline-edit-prompt" type="text" placeholder="Describe the modification...">
   <div class="toolbar-divider"></div>
-  <button class="toolbar-btn" onclick="clearMask()" title="Clear mask" style="color:var(--danger);">
+  <button class="toolbar-btn" data-sg-click="action111" title="Clear mask" style="color:var(--danger);">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
   </button>
-  <button class="toolbar-btn" onclick="submitEdit()" title="Submit edit" style="color:var(--accent-primary);">
+  <button class="toolbar-btn" data-sg-click="action112" title="Submit edit" style="color:var(--accent-primary);">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
   </button>
-  <button class="toolbar-btn" onclick="exitEditMode()" title="Exit edit">
+  <button class="toolbar-btn" data-sg-click="action113" title="Exit edit">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
 </div>
@@ -928,7 +727,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; margin-right:6px; color:var(--accent-primary);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <h2 style="font-size:14px; font-weight:700; margin:0;" data-i18n="history_picker_title">Select Image from History</h2>
       </div>
-      <button class="modal-close" onclick="hideHistoryPicker()">&times;</button>
+      <button class="modal-close" data-sg-click="action114">&times;</button>
     </div>
     <div class="modal-body" style="padding: 20px;">
       <div class="vid-hist-grid" id="history-picker-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-height: 380px; overflow-y: auto;">
@@ -944,13 +743,17 @@
      (localization first to translate UI elements before main app init)
 ═══════════════════════════════════════════ -->
 <script src="js/localization.js?v=0fdf54eba964"></script>
-<script src="js/app.js?v=03b80fc186ac"></script>
-<script src="js/history.js?v=1e7b77da3948"></script>
-<script src="js/results.js?v=5da2dad669c8"></script>
-<script src="js/video.js?v=399752f792ab"></script>
-<script src="js/image3d.js?v=f762dc909068"></script>
-<!-- <script src="js/video_workflow.js?v=4c6416f196b9"></script> -->
-<script src="js/batch.js?v=4aa7757fe5ef"></script>
+<script src="js/account-session.js?v=894e711c58aa"></script>
+<script src="js/billing-client.js?v=7f2e4637c7b5"></script>
+<script src="js/app.js?v=96fd6ff2a053"></script>
+<script src="omni/assets/lucide.min.js?v=3411692820cb"></script>
+<script src="js/omni-bridge.js?v=3746609d2a4c"></script>
+<script src="js/history.js?v=15284a28afbc"></script>
+<script src="js/results.js?v=42643fc5e92c"></script>
+<script src="js/video.js?v=eca566021ea7"></script>
+<script src="js/tripo-bridge.js?v=9b84d6c29325"></script>
+<!-- <script src="js/video_workflow.js?v=1caccb02540c"></script> -->
+<script src="js/batch.js?v=81a7492703d3"></script>
 
 <!-- BATCH RENDER MODAL -->
 <div id="batch-render-modal" class="modal-overlay" style="z-index: 2600; display: none;">
@@ -961,16 +764,16 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; margin-right:6px; color:var(--accent-primary);"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         <h2 style="font-size:14px; font-weight:700; margin:0;" data-i18n="batch_title">AI Batch Rendering</h2>
       </div>
-      <button class="modal-close" onclick="window.hideBatchRenderModal()">&times;</button>
+      <button class="modal-close" data-sg-click="action115">&times;</button>
     </div>
     
     <!-- Setup View -->
     <div id="batch-setup-view" class="modal-body" style="padding: 20px;">
       <!-- Source Selector Tabs -->
       <div class="vid-src-tabs" style="margin-bottom:16px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;">
-        <div class="vid-src-tab active" id="batch-tab-scenes" onclick="window.switchBatchTab('scenes')">Scenes</div>
-        <div class="vid-src-tab" id="batch-tab-upload" onclick="window.switchBatchTab('upload')">Upload</div>
-        <div class="vid-src-tab" id="batch-tab-screenshot" onclick="window.switchBatchTab('screenshot')">Screenshots</div>
+        <div class="vid-src-tab active" id="batch-tab-scenes" data-sg-click="action116">>Scenes</div>
+        <div class="vid-src-tab" id="batch-tab-upload" data-sg-click="action117">>Upload</div>
+        <div class="vid-src-tab" id="batch-tab-screenshot" data-sg-click="action118">>Screenshots</div>
       </div>
 
       <!-- Tab Content: SketchUp Scenes -->
@@ -984,9 +787,9 @@
       <!-- Tab Content: Upload Images -->
       <div id="batch-content-upload" style="margin-bottom: 16px; display: none;">
         <div style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Upload Images to Batch</div>
-        <div onclick="document.getElementById('batch-file-input').click()" style="border: 1px dashed rgba(239, 35, 60, 0.3); background: rgba(239, 35, 60, 0.04); border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; transition: 0.2s;">
+        <div data-sg-click="action119" style="border: 1px dashed rgba(239, 35, 60, 0.3); background: rgba(239, 35, 60, 0.04); border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; transition: 0.2s;">
           <span style="font-family: var(--font-mono); font-size: 10px; color: #ffffff;">Click to add images...</span>
-          <input type="file" id="batch-file-input" multiple accept="image/*" style="display: none;" onchange="window.handleBatchFileUpload(event)">
+          <input type="file" id="batch-file-input" multiple accept="image/*" style="display: none;" data-sg-change="action120">
         </div>
         <div id="batch-files-grid" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; max-height: 120px; overflow-y: auto;"></div>
       </div>
@@ -995,10 +798,10 @@
       <div id="batch-content-screenshot" style="margin-bottom: 16px; display: none;">
         <div style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Viewport Screenshots</div>
         <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-          <button onclick="window.grabBatchScreenshot()" style="flex: 1; padding: 10px; background: rgba(239, 35, 60, 0.1); border: 1px solid rgba(239, 35, 60, 0.3); border-radius: 6px; color: #ffffff; font-family: var(--font-mono); font-size: 9px; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; outline: none;">
+          <button data-sg-click="action121" style="flex: 1; padding: 10px; background: rgba(239, 35, 60, 0.1); border: 1px solid rgba(239, 35, 60, 0.3); border-radius: 6px; color: #ffffff; font-family: var(--font-mono); font-size: 9px; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; outline: none;">
             📸 Grab Viewport
           </button>
-          <button onclick="window.addExistingScreenshotToBatch()" style="flex: 1; padding: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: var(--text-main); font-family: var(--font-mono); font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; outline: none;">
+          <button data-sg-click="action122" style="flex: 1; padding: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: var(--text-main); font-family: var(--font-mono); font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; outline: none;">
             ➕ Add Last Captured
           </button>
         </div>
@@ -1017,7 +820,7 @@
           <span style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted);">Estimated Cost</span>
           <span id="batch-total-cost" style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: #ffffff;">0.0 CR</span>
         </div>
-        <button onclick="window.startBatchRender()" style="padding: 10px 20px; background: linear-gradient(135deg, #ef233c, #b3001b); border: none; border-radius: 6px; color: #fff; font-family: var(--font-mono); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 14px rgba(239, 35, 60, 0.35);">
+        <button data-sg-click="action123" style="padding: 10px 20px; background: linear-gradient(135deg, #ef233c, #b3001b); border: none; border-radius: 6px; color: #fff; font-family: var(--font-mono); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 14px rgba(239, 35, 60, 0.35);">
           Start Batch Render 🚀
         </button>
       </div>
@@ -1057,7 +860,7 @@
       
       <!-- Cancel / Close action -->
       <div style="display: flex; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
-        <button id="batch-cancel-btn" onclick="window.hideBatchRenderModal()" style="padding: 10px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: var(--text-main); font-family: var(--font-mono); font-size: 10px; cursor: pointer; transition: 0.2s;">
+        <button id="batch-cancel-btn" data-sg-click="action124" style="padding: 10px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: var(--text-main); font-family: var(--font-mono); font-size: 10px; cursor: pointer; transition: 0.2s;">
           CANCEL BATCH
         </button>
       </div>
@@ -1066,10 +869,10 @@
 </div>
 
 <!-- BATCH LIGHTBOX MODAL -->
-<div id="batch-lightbox-modal" class="modal-overlay" style="z-index: 2800; display: none;" onclick="this.style.display='none'">
+<div id="batch-lightbox-modal" class="modal-overlay" style="z-index: 2800; display: none;" data-sg-click="action125">
   <div style="position: relative; max-width: 90%; max-height: 90%; display: flex; align-items: center; justify-content: center;">
     <img id="batch-lightbox-img" src="" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; border: 2px solid rgba(239, 35, 60, 0.5); box-shadow: 0 10px 50px rgba(0,0,0,0.9);">
-    <button style="position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; border-radius: 50%; background: #0a0d14; border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="document.getElementById('batch-lightbox-modal').style.display='none'">&times;</button>
+    <button style="position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; border-radius: 50%; background: #0a0d14; border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;" data-sg-click="action126">&times;</button>
   </div>
 </div>
 
