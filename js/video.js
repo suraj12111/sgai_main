@@ -132,7 +132,7 @@ function vidLoadHistoryGrid() {
     const req = tx.objectStore(STORE_NAME).getAll();
     req.onsuccess = () => {
       const records = req.result
-        .filter(r => r.generated || r.thumbBase64)
+        .filter(r => (!r.type || r.type==='image') && (r.generated || r.thumbBase64))
         .sort((a, b) => b.timestamp - a.timestamp)
         .slice(0, 24);
       if (!records.length) {
@@ -141,20 +141,21 @@ function vidLoadHistoryGrid() {
       }
       grid.innerHTML = '';
       records.forEach(item => {
-        const src = item.generated
-          ? 'data:image/png;base64,' + item.generated
-          : (item.thumbBase64 ? 'data:image/png;base64,' + item.thumbBase64 : null);
+        const src = historyImageSrc(item.generated || item.thumbBase64);
         const div = document.createElement('div');
         div.className = 'vid-hist-thumb';
-        div.innerHTML = src ? `<img src="${src}" alt="">` : '<div class="vid-hist-no-img">No img</div>';
-        div.onclick = () => {
+        div.innerHTML = src ? `<img src="${escapeHistoryText(src)}" alt="">` : '<div class="vid-hist-no-img">No img</div>';
+        div.onclick = async () => {
+          let selected;
+          try {const fresh=await freshHistoryItem(item);selected=await historyImageData(historyImageSrc(fresh.generated||fresh.thumbBase64));}
+          catch(error){alert(error.message);return;}
           document.querySelectorAll('.vid-hist-thumb').forEach(el => el.classList.remove('selected'));
           div.classList.add('selected');
-          window._vidCustomImageB64 = src;
+          window._vidCustomImageB64 = selected;
           const si = document.getElementById('vid-hist-selected-img');
           const sw = document.getElementById('vid-hist-selected-wrap');
-          if (si && src) si.src = src;
-          if (sw) sw.style.display = src ? '' : 'none';
+          if (si && selected) si.src = selected;
+          if (sw) sw.style.display = selected ? '' : 'none';
         };
         grid.appendChild(div);
       });
@@ -202,7 +203,7 @@ function vidLoadEndHistoryGrid() {
     const req = tx.objectStore(STORE_NAME).getAll();
     req.onsuccess = () => {
       const records = req.result
-        .filter(r => r.generated || r.thumbBase64)
+        .filter(r => (!r.type || r.type==='image') && (r.generated || r.thumbBase64))
         .sort((a, b) => b.timestamp - a.timestamp);
       grid.innerHTML = '';
       if (records.length === 0) {
@@ -210,21 +211,22 @@ function vidLoadEndHistoryGrid() {
         return;
       }
       records.forEach(item => {
-        const src = item.generated
-          ? 'data:image/png;base64,' + item.generated
-          : (item.thumbBase64 ? 'data:image/png;base64,' + item.thumbBase64 : null);
+        const src = historyImageSrc(item.generated || item.thumbBase64);
         const div = document.createElement('div');
         div.className = 'vid-hist-thumb';
-        div.innerHTML = src ? `<img src="${src}" alt="">` : '<div class="vid-hist-no-img">No img</div>';
-        div.onclick = () => {
+        div.innerHTML = src ? `<img src="${escapeHistoryText(src)}" alt="">` : '<div class="vid-hist-no-img">No img</div>';
+        div.onclick = async () => {
+          let selected;
+          try {const fresh=await freshHistoryItem(item);selected=await historyImageData(historyImageSrc(fresh.generated||fresh.thumbBase64));}
+          catch(error){alert(error.message);return;}
           document.querySelectorAll('#vsrc-end-history-area .vid-hist-thumb').forEach(el => el.classList.remove('selected'));
           div.classList.add('selected');
-          window._vidEndImageB64 = src;
+          window._vidEndImageB64 = selected;
           window._vidMotionMode = 'transition';
           const si = document.getElementById('vid-end-hist-selected-img');
           const sw = document.getElementById('vid-end-hist-selected-wrap');
-          if (si && src) si.src = src;
-          if (sw) sw.style.display = src ? '' : 'none';
+          if (si && selected) si.src = selected;
+          if (sw) sw.style.display = selected ? '' : 'none';
         };
         grid.appendChild(div);
       });
@@ -320,8 +322,8 @@ function selectVideoPreset(presetId) {
   // Set camera motion
   const camPills = document.querySelectorAll('.cam-grid .cam-pill');
   camPills.forEach(pill => {
-    const clickAttr = pill.getAttribute('onclick') || '';
-    if (clickAttr.includes(preset.camera)) {
+    const camera = pill.dataset.camera;
+    if (camera === preset.camera) {
       document.querySelectorAll('.cam-pill').forEach(p => p.classList.remove('selected'));
       pill.classList.add('selected');
       window._vidCameraMotion = preset.camera;
@@ -363,7 +365,7 @@ function getSgaiServerBase() {
   if (val && !val.startsWith('http://') && !val.startsWith('https://')) {
     val = 'http://' + val;
   }
-  return val || 'http://localhost:3000';
+  return val || (window.SGAI_API_ORIGIN || location.origin).replace(/\/+$/, '');
 }
 
 // ── VIDEO PLAYER LOADER ───────────────────────────────
@@ -386,7 +388,7 @@ window.sgaiLoadVideo = function(videoElId, url, statusElId) {
   function onPlaySuccess() { setStatus('Ready', 'var(--accent-green)'); if (btn) btn.innerHTML = '&#9646;&#9646; PAUSE'; }
 
   const SERVER = getSgaiServerBase();
-  const proxyUrl = SERVER + '/api/proxy-video?url=' + encodeURIComponent(url);
+  const proxyUrl = SERVER + "https://sketchupgurus-ai-server.onrender.com/api/proxy-video?url=" + encodeURIComponent(url);
 
   setStatus('Loading...', '');
   bindNativeEvents();

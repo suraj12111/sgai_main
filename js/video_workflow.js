@@ -190,12 +190,12 @@ function renderNode(node) {
   
   // Custom header
   let headerHtml = `
-    <div class="wf-node-header" onmousedown="startDragNode(event, '${node.id}')">
+    <div class="wf-node-header" data-sg-mousedown="action151" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}">
       <div class="wf-node-title">
         ${getIcon(node.type)}
-        <span>${node.title}</span>
+        <span>${sgaiMarkupText(node.title)}</span>
       </div>
-      <div class="wf-node-subtitle">${getEngineLabel(node)}</div>
+      <div class="wf-node-subtitle">${sgaiMarkupText(getEngineLabel(node))}</div>
     </div>
   `;
 
@@ -205,28 +205,28 @@ function renderNode(node) {
   if (node.type === 'image') {
     const hasOutput = !!node.data.output;
     bodyHtml += `
-      <div class="wf-preview-box" id="${node.id}-preview-wrap" style="width:100%; height:260px; position:relative; overflow:hidden; border-radius:8px;">
-        <div class="wf-preview-empty" id="${node.id}-preview-text" style="${hasOutput ? 'display:none;' : ''}">No Image Output</div>
-        <img id="${node.id}-img" src="${node.data.output || ''}" style="${hasOutput ? 'display:block;' : 'display:none;'}" />
+      <div class="wf-preview-box" id="${sgaiMarkupText(node.id)}-preview-wrap" style="width:100%; height:260px; position:relative; overflow:hidden; border-radius:8px;">
+        <div class="wf-preview-empty" id="${sgaiMarkupText(node.id)}-preview-text" style="${hasOutput ? 'display:none;' : ''}">No Image Output</div>
+        <img id="${sgaiMarkupText(node.id)}-img" src="${sgaiMarkupText(sgaiMediaURL(node.data.output || ''))}" style="${hasOutput ? 'display:block;' : 'display:none;'}" />
         
         <!-- Overlay Prompt Box -->
         <div style="position:absolute; top:8px; left:8px; right:8px; z-index:10; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:4px;">
           <span class="wf-input-label" style="font-size:8px; color:rgba(255,255,255,0.7); font-family:var(--font-mono); margin:0;">AI Render Prompt</span>
-          <textarea class="wf-textarea" id="${node.id}-prompt" style="width:100%; height:32px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); font-size:9.5px; padding:4px; color:#fff; border-radius:4px; outline:none; resize:none; font-family:sans-serif;" onchange="updateNodeData('${node.id}', 'prompt', this.value)">${node.data.prompt || ''}</textarea>
+          <textarea class="wf-textarea" id="${sgaiMarkupText(node.id)}-prompt" style="width:100%; height:32px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); font-size:9.5px; padding:4px; color:#fff; border-radius:4px; outline:none; resize:none; font-family:sans-serif;" data-sg-change="action152" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}">${sgaiMarkupText(node.data.prompt || '')}</textarea>
         </div>
 
         <!-- Overlay Settings Badge -->
         <div style="position:absolute; bottom:8px; left:8px; z-index:10; display:flex; gap:6px; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:4px 6px;">
           <div>
             <span class="wf-input-label" style="font-size:7px; color:rgba(255,255,255,0.5); display:block; line-height:1; font-family:var(--font-mono); margin:0 0 2px 0;">Engine</span>
-            <select class="wf-select" id="${node.id}-model" style="font-size:8.5px; padding:2px; height:auto; background:transparent; border:none; color:var(--accent-primary); outline:none;" onchange="updateNodeData('${node.id}', 'model', this.value)">
+            <select class="wf-select" id="${sgaiMarkupText(node.id)}-model" style="font-size:8.5px; padding:2px; height:auto; background:transparent; border:none; color:#ffffff; outline:none;" data-sg-change="action153" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}">
               <option value="grok" ${node.data.model === 'grok' ? 'selected' : ''}>Grok</option>
               <option value="gemini" ${node.data.model === 'gemini' ? 'selected' : ''}>Gemini</option>
             </select>
           </div>
           <div style="border-left:1px solid rgba(255,255,255,0.15); padding-left:6px;">
             <span class="wf-input-label" style="font-size:7px; color:rgba(255,255,255,0.5); display:block; line-height:1; font-family:var(--font-mono); margin:0 0 2px 0;">Aspect</span>
-            <select class="wf-select" id="${node.id}-aspect" style="font-size:8.5px; padding:2px; height:auto; background:transparent; border:none; color:var(--accent-primary); outline:none;" onchange="updateNodeData('${node.id}', 'aspect', this.value)">
+            <select class="wf-select" id="${sgaiMarkupText(node.id)}-aspect" style="font-size:8.5px; padding:2px; height:auto; background:transparent; border:none; color:#ffffff; outline:none;" data-sg-change="action154" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}">
               <option value="16:9" ${node.data.aspect === '16:9' ? 'selected' : ''}>16:9</option>
               <option value="1:1" ${node.data.aspect === '1:1' ? 'selected' : ''}>1:1</option>
               <option value="4:3" ${node.data.aspect === '4:3' ? 'selected' : ''}>4:3</option>
@@ -236,13 +236,13 @@ function renderNode(node) {
 
         <!-- Float Upload Trigger -->
         <div style="position:absolute; bottom:8px; right:8px; z-index:10; display:flex; gap:4px;">
-          <button class="wf-node-delete-btn" style="padding:4px 8px; font-size:9.5px; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); color:#fff; border:1px solid rgba(255,255,255,0.15); border-radius:6px; cursor:pointer; font-family:var(--font-mono); font-weight:normal;" onclick="triggerNodeUpload('${node.id}')" title="Upload Image">
+          <button class="wf-node-delete-btn" style="padding:4px 8px; font-size:9.5px; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); color:#fff; border:1px solid rgba(255,255,255,0.15); border-radius:6px; cursor:pointer; font-family:var(--font-mono); font-weight:normal;" data-sg-click="action155" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}" title="Upload Image">
             &#8679; Upload
           </button>
-          <button class="wf-node-delete-btn" style="padding:4px 8px; font-size:9.5px; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); color:var(--accent-primary); border:1px solid rgba(255,255,255,0.15); border-radius:6px; cursor:pointer; font-family:var(--font-mono); font-weight:normal;" onclick="triggerNodeHistory('${node.id}')" title="Select from History">
+          <button class="wf-node-delete-btn" style="padding:4px 8px; font-size:9.5px; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); color:#ffffff; border:1px solid rgba(255,255,255,0.15); border-radius:6px; cursor:pointer; font-family:var(--font-mono); font-weight:normal;" data-sg-click="action156" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}" title="Select from History">
             📜 History
           </button>
-          <input type="file" id="${node.id}-file-input" style="display:none;" accept="image/*" onchange="handleNodeImageUpload(event, '${node.id}')" />
+          <input type="file" id="${sgaiMarkupText(node.id)}-file-input" style="display:none;" accept="image/*" data-sg-change="action157" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}" />
         </div>
       </div>
     `;
@@ -256,31 +256,31 @@ function renderNode(node) {
     const parentImage = firstParent ? (firstParent.data.output || '') : '';
     
     bodyHtml += `
-      <div class="wf-preview-box" id="${node.id}-preview-wrap" style="width:100%; height:260px; position:relative; overflow:hidden; border-radius:8px;">
-        <div class="wf-preview-empty" id="${node.id}-preview-text" style="${hasOutput ? 'display:none;' : ''}">No Video Output</div>
-        <video id="${node.id}-vid" src="${node.data.output || ''}" poster="${parentImage}" style="display:${hasOutput ? 'block' : 'none'}; width:100%; height:100%; object-fit:cover;" loop muted playsinline></video>
+      <div class="wf-preview-box" id="${sgaiMarkupText(node.id)}-preview-wrap" style="width:100%; height:260px; position:relative; overflow:hidden; border-radius:8px;">
+        <div class="wf-preview-empty" id="${sgaiMarkupText(node.id)}-preview-text" style="${hasOutput ? 'display:none;' : ''}">No Video Output</div>
+        <video id="${sgaiMarkupText(node.id)}-vid" src="${sgaiMarkupText(sgaiMediaURL(node.data.output || ''))}" poster="${sgaiMarkupText(sgaiMediaURL(parentImage))}" style="display:${hasOutput ? 'block' : 'none'}; width:100%; height:100%; object-fit:cover;" loop muted playsinline></video>
         
         <!-- Custom Open in Browser Button -->
-        <button id="${node.id}-browser-btn" style="${hasOutput ? 'display:block;' : 'display:none;'} position:absolute; bottom:8px; left:8px; z-index:15; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); color:var(--accent-primary); padding:4px 8px; border-radius:6px; font-family:var(--font-mono); font-size:9px; cursor:pointer;" onclick="window.open('${node.data.output || ''}', '_blank')">
+        <button id="${sgaiMarkupText(node.id)}-browser-btn" style="${hasOutput ? 'display:block;' : 'display:none;'} position:absolute; bottom:8px; left:8px; z-index:15; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); color:#ffffff; padding:4px 8px; border-radius:6px; font-family:var(--font-mono); font-size:9px; cursor:pointer;" data-sg-click="action158" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.data.output || ''))}">
           &#127760; OPEN IN BROWSER
         </button>
         
         <!-- Float Download Button -->
-        <button id="${node.id}-download-btn" style="${hasOutput ? 'display:block;' : 'display:none;'} position:absolute; top:8px; right:8px; z-index:15; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); color:var(--accent-primary); padding:4px 8px; border-radius:6px; font-family:var(--font-mono); font-size:9px; cursor:pointer;" onclick="window.downloadVideoFile('${node.data.output || ''}', 'SGAI_Video_Render.mp4')">
+        <button id="${sgaiMarkupText(node.id)}-download-btn" style="${hasOutput ? 'display:block;' : 'display:none;'} position:absolute; top:8px; right:8px; z-index:15; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); color:#ffffff; padding:4px 8px; border-radius:6px; font-family:var(--font-mono); font-size:9px; cursor:pointer;" data-sg-click="action159" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.data.output || ''))}">
           &#11015; DOWNLOAD
         </button>
 
         <!-- Overlay Prompt Box -->
         <div style="position:absolute; top:8px; left:8px; right:8px; z-index:10; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:4px;">
           <span class="wf-input-label" style="font-size:8px; color:rgba(255,255,255,0.7); font-family:var(--font-mono); margin:0;">Video Motion Prompt</span>
-          <textarea class="wf-textarea" id="${node.id}-prompt" style="width:100%; height:32px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); font-size:9.5px; padding:4px; color:#fff; border-radius:4px; outline:none; resize:none; font-family:sans-serif;" onchange="updateNodeData('${node.id}', 'prompt', this.value)">${node.data.prompt || ''}</textarea>
+          <textarea class="wf-textarea" id="${sgaiMarkupText(node.id)}-prompt" style="width:100%; height:32px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); font-size:9.5px; padding:4px; color:#fff; border-radius:4px; outline:none; resize:none; font-family:sans-serif;" data-sg-change="action160" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}">${sgaiMarkupText(node.data.prompt || '')}</textarea>
         </div>
 
         <!-- Overlay Settings Badge -->
         <div style="position:absolute; bottom:8px; left:8px; z-index:10; display:flex; gap:6px; background:rgba(8,10,15,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:4px 6px;">
           <div>
             <span class="wf-input-label" style="font-size:7px; color:rgba(255,255,255,0.5); display:block; line-height:1; font-family:var(--font-mono); margin:0 0 2px 0;">Duration</span>
-            <select class="wf-select" id="${node.id}-duration" style="font-size:8.5px; padding:2px; height:auto; background:transparent; border:none; color:var(--accent-primary); outline:none;" onchange="updateNodeData('${node.id}', 'duration', this.value)">
+            <select class="wf-select" id="${sgaiMarkupText(node.id)}-duration" style="font-size:8.5px; padding:2px; height:auto; background:transparent; border:none; color:#ffffff; outline:none;" data-sg-change="action161" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}">
               <option value="4" ${(node.data.duration || 6) == 4 ? 'selected' : ''}>4s</option>
               <option value="6" ${(node.data.duration || 6) == 6 ? 'selected' : ''}>6s</option>
               <option value="8" ${(node.data.duration || 6) == 8 ? 'selected' : ''}>8s</option>
@@ -288,7 +288,7 @@ function renderNode(node) {
           </div>
           <div style="border-left:1px solid rgba(255,255,255,0.15); padding-left:6px;">
             <span class="wf-input-label" style="font-size:7px; color:rgba(255,255,255,0.5); display:block; line-height:1; font-family:var(--font-mono); margin:0 0 2px 0;">Resolution</span>
-            <select class="wf-select" id="${node.id}-resolution" style="font-size:8.5px; padding:2px; height:auto; background:transparent; border:none; color:var(--accent-primary); outline:none;" onchange="updateNodeData('${node.id}', 'resolution', this.value)">
+            <select class="wf-select" id="${sgaiMarkupText(node.id)}-resolution" style="font-size:8.5px; padding:2px; height:auto; background:transparent; border:none; color:#ffffff; outline:none;" data-sg-change="action162" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}">
               <option value="720p" ${(node.data.resolution || '720p') === '720p' ? 'selected' : ''}>720p</option>
               <option value="1080p" ${(node.data.resolution || '720p') === '1080p' ? 'selected' : ''}>1080p</option>
             </select>
@@ -300,18 +300,18 @@ function renderNode(node) {
     bodyHtml += `
       <div class="wf-input-label">Track Timeline</div>
       <div class="comp-timeline">
-        <div class="comp-playback-line" id="${node.id}-playhead"></div>
+        <div class="comp-playback-line" id="${sgaiMarkupText(node.id)}-playhead"></div>
         <div class="comp-track-row">
           <div class="comp-track-header">Video</div>
           <div class="comp-track-channel">
-            <div class="comp-track-block video-block" style="display:none;" id="${node.id}-track-video">Video Track (6s)</div>
+            <div class="comp-track-block video-block" style="display:none;" id="${sgaiMarkupText(node.id)}-track-video">Video Track (6s)</div>
           </div>
         </div>
       </div>
       
-      <div class="wf-preview-box" style="aspect-ratio: 16/10;" id="${node.id}-preview-wrap">
-        <div class="wf-preview-empty" id="${node.id}-preview-text">Composition Player</div>
-        <video id="${node.id}-vid" style="display:none;" loop muted playsinline></video>
+      <div class="wf-preview-box" style="aspect-ratio: 16/10;" id="${sgaiMarkupText(node.id)}-preview-wrap">
+        <div class="wf-preview-empty" id="${sgaiMarkupText(node.id)}-preview-text">Composition Player</div>
+        <video id="${sgaiMarkupText(node.id)}-vid" style="display:none;" loop muted playsinline></video>
       </div>
     `;
   }
@@ -321,22 +321,22 @@ function renderNode(node) {
   // Custom footer with run/delete buttons
   let footerHtml = `
     <div class="wf-node-footer">
-      <button class="wf-node-delete-btn" onclick="deleteNode('${node.id}')" title="Delete Node">&#128465;</button>
-      <button class="wf-run-btn" id="${node.id}-run-btn" onclick="runNode('${node.id}')">Run</button>
+      <button class="wf-node-delete-btn" data-sg-click="action163" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}" title="Delete Node">&#128465;</button>
+      <button class="wf-run-btn" id="${sgaiMarkupText(node.id)}-run-btn" data-sg-click="action164" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}">Run</button>
     </div>
   `;
 
   // Spawning Ports
   let portsHtml = "";
   if (node.type === 'image') {
-    portsHtml += `<div class="port port-in" id="port-${node.id}-in" onclick="clickPort(event, '${node.id}', 'in')" data-node="${node.id}" data-port="in"></div>`;
-    portsHtml += `<div class="port port-out" id="port-${node.id}-out" onclick="clickPort(event, '${node.id}', 'out')" data-node="${node.id}" data-port="out"></div>`;
+    portsHtml += `<div class="port port-in" id="port-${sgaiMarkupText(node.id)}-in" data-sg-click="action165" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}" data-node="${sgaiMarkupText(node.id)}" data-port="in"></div>`;
+    portsHtml += `<div class="port port-out" id="port-${sgaiMarkupText(node.id)}-out" data-sg-click="action166" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}" data-node="${sgaiMarkupText(node.id)}" data-port="out"></div>`;
   } else if (node.type === 'video') {
-    portsHtml += `<div class="port port-in" style="top: 30%;" id="port-${node.id}-in-first" onclick="clickPort(event, '${node.id}', 'in-first')" data-node="${node.id}" data-port="in-first" title="First Frame (Start Image)"></div>`;
-    portsHtml += `<div class="port port-in" style="top: 70%;" id="port-${node.id}-in-last" onclick="clickPort(event, '${node.id}', 'in-last')" data-node="${node.id}" data-port="in-last" title="Last Frame (End Image)"></div>`;
-    portsHtml += `<div class="port port-out" id="port-${node.id}-out" onclick="clickPort(event, '${node.id}', 'out')" data-node="${node.id}" data-port="out"></div>`;
+    portsHtml += `<div class="port port-in" style="top: 30%;" id="port-${sgaiMarkupText(node.id)}-in-first" data-sg-click="action167" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}" data-node="${sgaiMarkupText(node.id)}" data-port="in-first" title="First Frame (Start Image)"></div>`;
+    portsHtml += `<div class="port port-in" style="top: 70%;" id="port-${sgaiMarkupText(node.id)}-in-last" data-sg-click="action168" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}" data-node="${sgaiMarkupText(node.id)}" data-port="in-last" title="Last Frame (End Image)"></div>`;
+    portsHtml += `<div class="port port-out" id="port-${sgaiMarkupText(node.id)}-out" data-sg-click="action169" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}" data-node="${sgaiMarkupText(node.id)}" data-port="out"></div>`;
   } else if (node.type === 'composition') {
-    portsHtml += `<div class="port port-in" id="port-${node.id}-in-video" onclick="clickPort(event, '${node.id}', 'in-video')" data-node="${node.id}" data-port="in-video" title="Video source"></div>`;
+    portsHtml += `<div class="port port-in" id="port-${sgaiMarkupText(node.id)}-in-video" data-sg-click="action170" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(node.id))}" data-node="${sgaiMarkupText(node.id)}" data-port="in-video" title="Video source"></div>`;
   }
 
   nodeEl.innerHTML = headerHtml + bodyHtml + footerHtml + portsHtml;
@@ -475,7 +475,7 @@ function updatePortConnectedStates() {
   
   wfLinks.forEach(link => {
     const p1 = document.getElementById(`port-${link.fromNode}-${link.fromPort}`);
-    const p2 = document.getElementById(`port-${link.toNode}-${link.toPort}`);
+    const p2 = document.getElementById(`port-${link.toNode}-${sgaiMarkupText(link.toPort)}`);
     if (p1) p1.classList.add('connected');
     if (p2) p2.classList.add('connected');
   });
@@ -494,7 +494,7 @@ function drawAllConnections() {
   
   wfLinks.forEach(link => {
     const p1 = document.getElementById(`port-${link.fromNode}-${link.fromPort}`);
-    const p2 = document.getElementById(`port-${link.toNode}-${link.toPort}`);
+    const p2 = document.getElementById(`port-${link.toNode}-${sgaiMarkupText(link.toPort)}`);
     
     if (!p1 || !p2) return;
     
@@ -582,8 +582,8 @@ function updateSidebarLinksList() {
     const toLabel = getShortNodeLabel(link.toNode);
     html += `
       <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); padding:4px 8px; border:1px solid rgba(255,255,255,0.04); border-radius:4px;">
-        <span>${fromLabel} &#10142; ${toLabel} (${link.toPort})</span>
-        <button style="background:transparent; border:none; color:rgba(255,79,112,0.6); cursor:pointer; font-size:10px; font-weight:bold;" onclick="deleteLink('${link.id}')">&times;</button>
+        <span>${sgaiMarkupText(fromLabel)} &#10142; ${sgaiMarkupText(toLabel)} (${sgaiMarkupText(link.toPort)})</span>
+        <button style="background:transparent; border:none; color:rgba(255,79,112,0.6); cursor:pointer; font-size:10px; font-weight:bold;" data-sg-click="action171" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(link.id))}">&times;</button>
       </div>
     `;
   });
@@ -859,14 +859,14 @@ async function runVideoNode(node) {
     const browserBtn = document.getElementById(`${node.id}-browser-btn`);
     if (browserBtn) {
       browserBtn.style.display = 'block';
-      browserBtn.setAttribute('onclick', `window.open('${videoUrl}', '_blank')`);
+      browserBtn.onclick = () => sgaiOpenMedia(videoUrl);
     }
     
     // Show download button
     const downloadBtn = document.getElementById(`${node.id}-download-btn`);
     if (downloadBtn) {
       downloadBtn.style.display = 'block';
-      downloadBtn.setAttribute('onclick', `window.downloadVideoFile('${videoUrl}', 'SGAI_Video_Render.mp4')`);
+      downloadBtn.onclick = () => window.downloadVideoFile(sgaiMediaURL(videoUrl), 'SGAI_Video_Render.mp4');
     }
   }
   
@@ -1027,7 +1027,7 @@ function showNodeLoader(nodeId, text = "Loading...") {
   loader.className = 'wf-loader-overlay';
   loader.innerHTML = `
     <div class="wf-loader-spinner"></div>
-    <div class="wf-loader-text">${text}</div>
+    <div class="wf-loader-text">${sgaiMarkupText(text)}</div>
   `;
   nodeEl.appendChild(loader);
 }

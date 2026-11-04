@@ -4,8 +4,8 @@
    render pipeline, prompt builder
    ===================================================== */
 
-const SERVER_URL = 'https://sketchupgurus-ai-server.onrender.com/api'; // ← mock server (change to Render.com URL for production)
-let userEmail = localStorage.getItem('sgai_user_email');
+const SERVER_URL = "https://sketchupgurus-ai-server.onrender.com/api";
+let userEmail = sgaiCaptureSession()?.email || null;
 let systemHardwareId = "pending";
 
 // ── GLOBAL STATE ──────────────────────────────────────
@@ -116,6 +116,7 @@ function initApp() {
     updateUserInfoArea(userEmail);
   }
   syncCredits();
+  startCreditRefresh();
   loadHistoryUI();
   initPresetsGallery();
 }
@@ -125,12 +126,12 @@ function updateUserInfoArea(email) {
   const area = document.getElementById('user-info-area');
   const username = email.split('@')[0];
   area.innerHTML = `
-    <div class="user-card" onclick="showProfileModal()">
+    <div class="user-card" data-sg-click="action127">
       <div class="user-avatar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
       <div class="user-info">
-        <div class="user-name">${username}</div>
+        <div class="user-name">${sgaiMarkupText(username)}</div>
         <div class="user-credits" id="sidebar-credit-display">SYNCING...</div>
       </div>
       <svg class="user-logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -140,6 +141,15 @@ function updateUserInfoArea(email) {
 
 // ── TAB SWITCHER ──────────────────────────────────────
 function switchTab(tab) {
+  document.body.classList.toggle('tripo-active',tab==='3d');
+  if(tab==='3d'){const frame=document.getElementById('tripo-frame');if(frame&&!frame.getAttribute('src'))frame.src=frame.dataset.src;}
+  document.body.classList.toggle('omni-active', tab === 'omni');
+  const omni = document.getElementById('main-omni');
+  if (omni) omni.hidden = tab !== 'omni';
+  if (tab === 'omni') {
+    const frame = document.getElementById('omni-frame');
+    if (!frame.getAttribute('src')) frame.src = frame.dataset.src;
+  }
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const el = document.getElementById('tab-' + tab);
@@ -194,6 +204,23 @@ function toggleAuthMode(mode) {
   }
 }
 
+async function authFetch(url, options) {
+  const authState=sgaiCaptureAuthState();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    const data = await response.json();
+    sgaiAssertAuthState(authState);
+    return { response, data };
+  } catch (error) {
+    if (controller.signal.aborted) throw new Error('Request timed out. Please try again.');
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function submitAuth() {
   const email = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
@@ -205,11 +232,9 @@ async function submitAuth() {
   if (currentAuthMode === 'login') {
     btn.innerText = 'Authenticating...'; btn.disabled = true;
     try {
-      const res = await fetch(`${SERVER_URL}/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, machineId: systemHardwareId }) });
-      const data = await res.json();
+      const { response: res, data } = await authFetch(`${SERVER_URL}/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, machineId: systemHardwareId }) });
       if (!res.ok) throw new Error(data.error || 'Login failed.');
-      localStorage.setItem('sgai_user_email', email); userEmail = email;
-      if (data.token) localStorage.setItem('sgai_auth_token', data.token);
+      if(!sgaiSetSession(email,data.token))return;userEmail=email;
       document.getElementById('auth-modal').style.display = 'none'; initApp();
     } catch(e) { errorEl.innerText = e.message; errorEl.style.display = 'block'; }
     finally { btn.innerText = 'Login to Account'; btn.disabled = false; }
@@ -217,8 +242,7 @@ async function submitAuth() {
     if (!otpSent) {
       btn.innerText = 'Sending...'; btn.disabled = true;
       try {
-        const res = await fetch(`${SERVER_URL}/send-otp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, machineId: systemHardwareId }) });
-        const data = await res.json();
+        const { response: res, data } = await authFetch(`${SERVER_URL}/send-otp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, machineId: systemHardwareId }) });
         if (!res.ok) throw new Error(data.error || 'Failed to send OTP.');
         otpSent = true;
         document.getElementById('otp-group').style.display = 'block';
@@ -226,17 +250,15 @@ async function submitAuth() {
         document.getElementById('auth-password').disabled = true;
         btn.innerText = 'Create Account';
       } catch(e) { errorEl.innerText = e.message; errorEl.style.display = 'block'; }
-      finally { btn.disabled = false; }
+      finally { btn.disabled = false; btn.innerText = otpSent ? 'Create Account' : 'Send Verification Code'; }
     } else {
       const otp = document.getElementById('auth-otp').value.trim();
       if (!otp) { errorEl.innerText = 'Please enter the OTP.'; errorEl.style.display = 'block'; return; }
       btn.innerText = 'Creating account...'; btn.disabled = true;
       try {
-        const res = await fetch(`${SERVER_URL}/signup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, otp }) });
-        const data = await res.json();
+        const { response: res, data } = await authFetch(`${SERVER_URL}/signup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, otp }) });
         if (!res.ok) throw new Error(data.error || 'Signup failed.');
-        localStorage.setItem('sgai_user_email', email); userEmail = email;
-        if (data.token) localStorage.setItem('sgai_auth_token', data.token);
+        if(!sgaiSetSession(email,data.token))return;userEmail=email;
         document.getElementById('auth-modal').style.display = 'none'; initApp();
       } catch(e) { errorEl.innerText = e.message; errorEl.style.display = 'block'; }
       finally { btn.disabled = false; btn.innerText = 'Create Account'; }
@@ -251,8 +273,15 @@ async function initGoogleSignIn() {
   const isInsidePlugin = (typeof sketchup !== 'undefined');
   if (isInsidePlugin) {
     googleSignInInitialized = true;
-    const wrapper = document.getElementById("google-signin-wrapper");
-    if (wrapper) wrapper.style.display = 'none';
+    const container = document.getElementById('google-signin-btn');
+    if (container) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn-secondary';
+      button.innerText = 'Sign in with Google in browser';
+      button.onclick = () => startDesktopSignIn(button);
+      container.replaceChildren(button);
+    }
     return;
   }
 
@@ -280,6 +309,7 @@ async function initGoogleSignIn() {
 }
 
 async function handleGoogleCredentialResponse(response) {
+  const authState=sgaiCaptureAuthState();
   const errorEl = document.getElementById('auth-error');
   if (errorEl) errorEl.style.display = 'none';
   const idToken = response.credential;
@@ -298,11 +328,10 @@ async function handleGoogleCredentialResponse(response) {
       body: JSON.stringify({ idToken, machineId: systemHardwareId })
     });
     const data = await res.json();
+    sgaiAssertAuthState(authState);
     if (!res.ok) throw new Error(data.error || 'Google authentication failed.');
     
-    localStorage.setItem('sgai_user_email', data.email);
-    userEmail = data.email;
-    if (data.token) localStorage.setItem('sgai_auth_token', data.token);
+    if(!sgaiSetSession(data.email,data.token))return;userEmail=data.email;
     
     const modal = document.getElementById('auth-modal');
     if (modal) modal.style.display = 'none';
@@ -321,7 +350,58 @@ async function handleGoogleCredentialResponse(response) {
   }
 }
 
-function logoutUser() { localStorage.removeItem('sgai_user_email'); localStorage.removeItem('sgai_auth_token'); userEmail = null; location.reload(); }
+function logoutUser() { userEmail=null;sgaiClearSession(); }
+
+async function startDesktopSignIn(button) {
+  const authState=sgaiCaptureAuthState();
+  const original = button.innerText;
+  button.disabled = true;
+  const errorEl = document.getElementById('auth-error');
+  try {
+    const bytes = crypto.getRandomValues(new Uint8Array(32));
+    const encode = value => btoa(String.fromCharCode(...value)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const verifier = encode(bytes);
+    const challenge = encode(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier))));
+    const { response, data } = await authFetch(`${SERVER_URL}/desktop-auth/start`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ challenge })
+    });
+    if (!response.ok) throw new Error(data.error || 'Unable to start sign-in.');
+    if (!/^[A-Za-z0-9_-]{43}$/.test(data.id)) throw new Error('Invalid sign-in response.');
+    button.innerText = `Confirm ${data.code} in browser`;
+    sketchup.open_external(`https://sketchupgurus-ai-server.onrender.com/desktop-login.html#${data.id}`);
+    const expires = Date.now() + 300000;
+    while (Date.now() < expires) {
+      await new Promise(resolve => setTimeout(resolve, 4000));
+      const { response: pollResponse, data: result } = await authFetch(`${SERVER_URL}/desktop-auth/${data.id}/poll`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verifier })
+      });
+      if (!pollResponse.ok) throw new Error(result.error || 'Browser sign-in failed.');
+      if (result.pending) continue;
+      sgaiAssertAuthState(authState);
+      if(!sgaiSetSession(result.email,result.token))return;userEmail=result.email;
+      document.getElementById('auth-modal').style.display = 'none';
+      initApp();
+      return;
+    }
+    throw new Error('Browser sign-in expired. Please try again.');
+  } catch (error) {
+    errorEl.innerText = error.message;
+    errorEl.style.display = 'block';
+  } finally {
+    button.disabled = false;
+    button.innerText = original;
+  }
+}
+
+function openCheckout(value) {
+  const url = new URL(value);
+  if (url.protocol !== 'https:' || url.port || url.username || url.password ||
+      !['rzp.io', 'rzp.pay', 'pages.razorpay.com', 'checkout.razorpay.com'].includes(url.hostname)) {
+    throw new Error('Untrusted payment link.');
+  }
+  if (typeof sketchup !== 'undefined') sketchup.open_external(url.href);
+  else window.open(url.href, '_blank', 'noopener,noreferrer');
+}
 
 // ── PROFILE & PAYWALL ─────────────────────────────────
 function showProfileModal() {
@@ -414,15 +494,9 @@ async function payWithRazorpay(tier) {
     });
     const data = await res.json();
     if (data.payment_url) {
-      const a = document.createElement('a'); a.href = data.payment_url; a.target = '_blank';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      openCheckout(data.payment_url);
       hidePaywall();
-      let pollCount = 0;
-      const poll = setInterval(async () => {
-        pollCount++;
-        await syncCredits();
-        if (pollCount >= 20) clearInterval(poll);
-      }, 5000);
+      startCreditRefresh(true);
     } else { throw new Error(data.error || 'Payment link failed.'); }
   } catch(e) { syncCredits(); alert('Payment error: ' + e.message); }
 }
@@ -450,6 +524,7 @@ async function copyPaymentLink(event, tier) {
         throw new Error("Invalid payment URL protocol.");
       }
       await navigator.clipboard.writeText(cleanUrl);
+      startCreditRefresh(true);
       if (btn) {
         btn.innerText = "Copied! 👍";
         setTimeout(() => { btn.innerText = originalText; }, 2000);
@@ -465,30 +540,55 @@ async function copyPaymentLink(event, tier) {
 }
 
 // ── CREDITS ───────────────────────────────────────────
+let creditRefreshTimer;
+let creditSyncPending = false;
+let paymentWatchUntil = 0;
+
+function startCreditRefresh(afterCheckout = false) {
+  if (afterCheckout) paymentWatchUntil = Date.now() + 10 * 60 * 1000;
+  if (creditRefreshTimer) return;
+  creditRefreshTimer = setInterval(() => {
+    const interval = Date.now() < paymentWatchUntil ? 5000 : 15000;
+    if (document.visibilityState !== 'hidden' && Date.now() - lastCreditSync >= interval) syncCredits();
+  }, 5000);
+  window.addEventListener('focus', () => syncCredits());
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncCredits();
+  });
+}
+
+let lastCreditSync = 0;
 async function syncCredits() {
   if (!userEmail) return;
+  if (creditSyncPending) return;
   const token = localStorage.getItem('sgai_auth_token');
+  if (!token) return;
+  creditSyncPending = true;
   try {
-    const res = await fetch(`${SERVER_URL}/get-user`, {
+    const { response: res, data } = await authFetch(`${SERVER_URL}/get-user`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + token
       }
     });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
+    if (!res.ok || data.error) throw new Error(data.error || 'Unable to refresh credits.');
+    const credits = Number(data.credits);
+    if (!Number.isFinite(credits)) throw new Error('Invalid account balance.');
+    lastCreditSync = Date.now();
     const counter = document.getElementById('credit-counter');
     if (counter) {
-      counter.innerText = `${data.credits.toFixed(1)} CREDITS`;
-      counter.style.color = data.credits <= 0 ? 'var(--danger)' : 'var(--accent-primary)';
+      counter.innerText = `${credits.toFixed(1)} CREDITS`;
+      counter.style.color = credits <= 0 ? 'var(--danger)' : 'var(--accent-primary)';
     }
     const sidebarCredits = document.getElementById('sidebar-credit-display');
     if (sidebarCredits) {
-      sidebarCredits.innerText = `${data.credits.toFixed(1)} CR REMAINING`;
-      sidebarCredits.classList.toggle('low', data.credits <= 0);
+      sidebarCredits.innerText = `${credits.toFixed(1)} CR REMAINING`;
+      sidebarCredits.classList.toggle('low', credits <= 0);
     }
+    return credits;
   } catch (e) { console.error("Credit sync failed:", e); }
+  finally { creditSyncPending = false; }
 }
 
 // ── VIEWPORT / IMAGE CAPTURE ──────────────────────────
@@ -582,12 +682,12 @@ function receiveViewportImage(sourceData) {
       }
 
       document.getElementById('status').innerText = 'Image captured. Ready to render.';
-      document.getElementById('status').style.color = 'var(--accent-primary)';
+      document.getElementById('status').style.color = '#ffffff';
 
       document.getElementById('results-container').innerHTML = `
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;text-align:center;">
-          <h3 style="font-family:var(--font-mono);font-size:11px;color:var(--accent-primary);margin-top:0;margin-bottom:12px;text-transform:uppercase;letter-spacing:2px;">VIEWPORT PREVIEW</h3>
-          <img src="data:image/jpeg;base64,${fastB64}" style="width:100%;max-width:800px;border:1px solid rgba(255,255,255,0.1);opacity:0.8;display:block;object-fit:contain;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+          <h3 style="font-family:var(--font-mono);font-size:11px;color:#ffffff;margin-top:0;margin-bottom:12px;text-transform:uppercase;letter-spacing:2px;">VIEWPORT PREVIEW</h3>
+          <img src="data:image/jpeg;base64,${sgaiMarkupText(fastB64)}" style="width:100%;max-width:800px;border:1px solid rgba(255,255,255,0.1);opacity:0.8;display:block;object-fit:contain;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
         </div>`;
     };
     img.src = 'data:image/jpeg;base64,' + fastB64;
@@ -603,12 +703,12 @@ function selectQuality(mode) {
   const label = document.getElementById('render-btn-label');
   const hint = document.getElementById('quality-hint');
   if (mode === '4k') {
-    k4Pill.style.cssText = 'background:rgba(0,229,255,0.15);border-color:var(--accent-primary);color:var(--accent-primary);box-shadow:0 0 10px rgba(0,229,255,0.1)';
+    k4Pill.style.cssText = 'background:rgba(239,35,60,0.15);border-color:var(--accent-primary);color:#ffffff;box-shadow:0 0 12px rgba(239,35,60,0.25);font-weight:700;';
     hdPill.style.cssText = 'background:rgba(0,0,0,0.4);border-color:var(--border-subtle);color:var(--text-muted);box-shadow:none';
     label.innerText = '4 CR';
     hint.innerHTML = '<span style="color:var(--accent-gold);font-weight:bold;">4K</span> — Ultra-high detail, maximum resolution output. Costs 4 credits.';
   } else {
-    hdPill.style.cssText = 'background:rgba(0,229,255,0.15);border-color:var(--accent-primary);color:var(--accent-primary);box-shadow:0 0 10px rgba(0,229,255,0.1)';
+    hdPill.style.cssText = 'background:rgba(239,35,60,0.15);border-color:var(--accent-primary);color:#ffffff;box-shadow:0 0 12px rgba(239,35,60,0.25);font-weight:700;';
     k4Pill.style.cssText = 'background:rgba(0,0,0,0.4);border-color:var(--border-subtle);color:var(--text-muted);box-shadow:none';
     label.innerText = '1 CR';
     hint.innerText = 'HD — Fast, standard quality render.';
@@ -648,7 +748,7 @@ function renderPropList() {
   const cont = document.getElementById('prop-preview-container');
   cont.innerHTML = '';
   propImages.forEach((p, i) => {
-    cont.innerHTML += `<div class="prop-thumbnail"><img src="${p.src}"><button class="prop-remove-btn" onclick="removeProp(${i})">x</button></div>`;
+    cont.innerHTML += `<div class="prop-thumbnail"><img src="${sgaiMarkupText(sgaiMediaURL(p.src))}"><button class="prop-remove-btn" data-sg-click="action128" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(i))}">x</button></div>`;
   });
 }
 function removeProp(i) { propImages.splice(i, 1); renderPropList(); }
@@ -775,7 +875,7 @@ async function startRender(outputType = 'image') {
 
   const token = localStorage.getItem('sgai_auth_token');
   try {
-    const res = await fetch(`${SERVER_URL}/generate`, {
+    const res = await sgaiPaidFetch(`${SERVER_URL}/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -791,7 +891,7 @@ async function startRender(outputType = 'image') {
 
     if (res.status === 403) return showPaywall();
     if (!res.ok || data.error) {
-      document.getElementById('status').innerText = `API ERROR: ${data.error || "Unknown Error"}`;
+      document.getElementById('status').innerText = sgaiPaidError(data);
       document.getElementById('status').style.color = "var(--danger)"; return;
     }
 
@@ -799,23 +899,23 @@ async function startRender(outputType = 'image') {
       const c = document.getElementById('results-container');
       c.innerHTML = `
         <div style="width:100%;max-width:860px;margin:0 auto;background:rgba(0,0,0,0.6);border:1px solid var(--border-color);border-radius:10px;overflow:hidden;">
-          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1.5px;color:var(--accent-primary);padding:10px 14px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1.5px;color:#ffffff;padding:10px 14px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;">
             <span>&#9654; VIDEO OUTPUT</span>
             <span id="vid-status-main" style="color:var(--text-muted);">Loading...</span>
           </div>
-          <video id="sgai-main-video" poster="${inputImageB64 || ''}" controls autoplay loop muted playsinline crossorigin="anonymous" preload="auto"
+          <video id="sgai-main-video" poster="${sgaiMarkupText(sgaiMediaURL(inputImageB64 || ''))}" controls autoplay loop muted playsinline crossorigin="anonymous" preload="auto"
             style="width:100%;display:block;max-height:480px;background:#000;outline:none;"></video>
           <div style="display:flex;gap:10px;padding:12px 14px;border-top:1px solid var(--border-color);">
-            <button id="vid-play-btn-main" onclick="window.sgaiVideoPlay('sgai-main-video','vid-play-btn-main')"
-              style="flex:1;padding:9px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--accent-primary);font-family:var(--font-mono);font-size:10px;letter-spacing:1px;cursor:pointer;">
+            <button id="vid-play-btn-main" data-sg-click="action129"
+              style="flex:1;padding:9px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:#ffffff;font-family:var(--font-mono);font-size:10px;letter-spacing:1px;cursor:pointer;">
               &#9654; PLAY
             </button>
-            <button onclick="window.open('${data.videoUrl}', '_blank')"
-              style="flex:1;display:flex;align-items:center;justify-content:center;padding:9px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--accent-primary);font-family:var(--font-mono);font-size:10px;letter-spacing:1px;cursor:pointer;outline:none;">
+            <button data-sg-click="action130" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(data.videoUrl))}"
+              style="flex:1;display:flex;align-items:center;justify-content:center;padding:9px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:#ffffff;font-family:var(--font-mono);font-size:10px;letter-spacing:1px;cursor:pointer;outline:none;">
               &#127760; OPEN IN BROWSER
             </button>
-             <button onclick="window.downloadVideoFile('${data.videoUrl}')"
-              style="flex:1;display:flex;align-items:center;justify-content:center;padding:9px;border-radius:6px;border:1px solid rgba(0,229,255,0.3);background:transparent;color:var(--accent-primary);font-family:var(--font-mono);font-size:10px;letter-spacing:1px;cursor:pointer;outline:none;">
+             <button data-sg-click="action131" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(data.videoUrl))}"
+              style="flex:1;display:flex;align-items:center;justify-content:center;padding:9px;border-radius:6px;border:1px solid rgba(239,35,60,0.3);background:transparent;color:#ffffff;font-family:var(--font-mono);font-size:10px;letter-spacing:1px;cursor:pointer;outline:none;">
               &#11015; DOWNLOAD
             </button>
           </div>
@@ -830,7 +930,7 @@ async function startRender(outputType = 'image') {
     }
 
     syncCredits();
-    document.getElementById('status').innerText = isVideo ? "Video Complete." : (renderQuality === '4k' ? "4K Renders Complete." : "Renders Complete.");
+    document.getElementById('status').innerText = sgaiCloudCompletion(data,isVideo ? "Video Complete." : (renderQuality === '4k' ? "4K Renders Complete." : "Renders Complete."));
     document.getElementById('status').style.color = "var(--accent-primary)";
   } catch(e) {
     const mainBtn = document.getElementById('main-render-btn');
@@ -846,13 +946,14 @@ async function startVideoRender() { startRender('video'); }
 
 // ── GLOBAL VIDEO DOWNLOAD HELPER ─────────────────────
 window.downloadVideoFile = function(videoUrl, filename = "SGAI_Render.mp4") {
+  videoUrl = sgaiMediaURL(videoUrl);
   if (!videoUrl) {
     alert("No video output generated yet to download.");
     return;
   }
   
   // Use proxy to bypass CORS and force direct file download
-  const proxyUrl = `https://sketchupgurus-ai-server.onrender.com/api/proxy-video?url=${encodeURIComponent(videoUrl)}`;
+  const proxyUrl = `${SERVER_URL}/proxy-video?url=${encodeURIComponent(videoUrl)}`;
   
   // Create a loading state feedback if needed (optional, just console.log here)
   console.log(`Downloading video via proxy: ${proxyUrl}`);
@@ -876,7 +977,7 @@ window.downloadVideoFile = function(videoUrl, filename = "SGAI_Render.mp4") {
     .catch(err => {
       console.warn("Direct proxy download failed, falling back to opening in a new tab:", err);
       // Fallback: Open in new tab
-      window.open(videoUrl, '_blank');
+      sgaiOpenMedia(videoUrl);
     });
 };
 

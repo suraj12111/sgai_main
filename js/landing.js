@@ -333,44 +333,41 @@
       if (e) e.preventDefault();
       var modal = document.getElementById('app-modal');
       var frame = document.getElementById('sgai-app-frame');
-      if (!appFrameLoaded && frame) {
-        frame.src = 'app.html';
+      if (!modal || !frame) {
+        window.location.assign('app.html?v=38fc8f2424b3');
+        return;
+      }
+      var navLinks = document.querySelector('.nav-links');
+      if (navLinks && navLinks.classList.contains('is-active')) toggleMobileMenu();
+      if (!appFrameLoaded) {
+        frame.src = 'app.html?v=38fc8f2424b3';
         appFrameLoaded = true;
       }
       modal.classList.remove('is-closing');
-      modal.classList.add('is-open');
-      modal.classList.add('is-opening');
+      modal.classList.add('is-open', 'is-opening');
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
-
-      // Auto-close mobile nav menu if open when starting the app
-      var navLinks = document.querySelector('.nav-links');
-      if (navLinks.classList.contains('is-active')) {
-        toggleMobileMenu();
-      }
     };
 
     window.closeAppModal = function() {
       var modal = document.getElementById('app-modal');
-      if (!modal.classList.contains('is-open')) return;
+      if (!modal || !modal.classList.contains('is-open')) return;
       modal.classList.remove('is-opening');
       modal.classList.add('is-closing');
       setTimeout(function() {
-        modal.classList.remove('is-open');
-        modal.classList.remove('is-closing');
+        if (!modal.classList.contains('is-closing')) return;
+        modal.classList.remove('is-open', 'is-closing');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
       }, 220);
     };
 
-    document.getElementById('app-modal').addEventListener('click', function(e) {
+    var appModal = document.getElementById('app-modal');
+    if (appModal) appModal.addEventListener('click', function(e) {
       if (e.target === this) closeAppModal();
     });
-
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && document.getElementById('app-modal').classList.contains('is-open')) {
-        closeAppModal();
-      }
+      if (e.key === 'Escape') closeAppModal();
     });
 
     // Mobile navigation menu toggle

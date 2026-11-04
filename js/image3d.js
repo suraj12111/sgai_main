@@ -166,13 +166,14 @@ function i3dUpdateStatus(status, progress, errMsg) {
 function i3dShowModel(task) {
   document.getElementById('i3d-progress-card').style.display = 'none';
   document.getElementById('i3d-model-card').style.display = '';
-  var urls = task.model_urls || {};
+  var urls = Object.fromEntries(Object.entries(task.model_urls || {}).map(([format, url]) => [format, sgaiSafeAssetUrl(url)]));
   i3dGlbUrl = urls.glb || null;
 
   var thumbContainer = document.getElementById('i3d-thumb');
   if (thumbContainer) {
     if (i3dGlbUrl) {
-      thumbContainer.innerHTML = '<model-viewer id="i3d-model-viewer" src="' + i3dGlbUrl + '" camera-controls auto-rotate shadow-intensity="1" alt="3D Model Preview" style="width:100%; height:100%; display:block; outline:none; background:#0d1018;"></model-viewer>';
+      var proxiedUrl = i3dServerBase() + "https://sketchupgurus-ai-server.onrender.com/api/proxy-3d?url=" + encodeURIComponent(i3dGlbUrl);
+      thumbContainer.innerHTML = '<model-viewer id="i3d-model-viewer" src="' + escapeHistoryText(proxiedUrl) + '" camera-controls auto-rotate shadow-intensity="1" alt="3D Model Preview" style="width:100%; height:100%; display:block; outline:none; background:#0d1018;"></model-viewer>';
       i3dWireframeEnabled = false;
       const wfIcon = document.getElementById('i3d-wireframe-btn-icon');
       if (wfIcon) {
@@ -182,7 +183,10 @@ function i3dShowModel(task) {
       var tb = document.getElementById('i3d-viewer-toolbar');
       if (tb) tb.style.display = 'flex';
     } else if (task.thumbnail_url) {
-      thumbContainer.innerHTML = '<img src="' + task.thumbnail_url + '" alt="Model Thumbnail">';
+      const image = document.createElement('img');
+      image.src = sgaiSafeAssetUrl(task.thumbnail_url);
+      image.alt = 'Model Thumbnail';
+      thumbContainer.replaceChildren(image);
       var tb = document.getElementById('i3d-viewer-toolbar');
       if (tb) tb.style.display = 'none';
     } else {
@@ -197,7 +201,7 @@ function i3dShowModel(task) {
   ['glb', 'fbx', 'obj', 'usdz', 'stl'].forEach(function(fmt) {
     if (urls[fmt]) {
       var a = document.createElement('a');
-      a.className = 'i3d-dl-btn'; a.href = urls[fmt]; a.target = '_blank';
+      a.className = 'i3d-dl-btn'; a.href = sgaiMediaURL(urls[fmt]); a.target = '_blank'; a.rel = 'noopener noreferrer';
       a.innerHTML = 'DL<br><span style="opacity:.6">' + fmt.toUpperCase() + '</span>';
       grid.appendChild(a);
     }
@@ -217,7 +221,10 @@ function i3dImportSKP() {
     var sk = (typeof sketchup !== 'undefined') ? sketchup : null;
     
     if (sk && (typeof sk.import_model === 'function' || typeof sk.import_model === 'object')) {
-      sk.import_model(i3dGlbUrl);
+      var importUrl = (i3dGlbUrl.startsWith('http') && !i3dGlbUrl.includes("https://sketchupgurus-ai-server.onrender.com/api/proxy-3d"))
+        ? (i3dServerBase() + "https://sketchupgurus-ai-server.onrender.com/api/proxy-3d?url=" + encodeURIComponent(i3dGlbUrl))
+        : i3dGlbUrl;
+      sk.import_model(importUrl);
       setTimeout(function() {
         btn.disabled = false; btn.textContent = 'Import GLB into SketchUp';
         var s = document.getElementById('i3d-skp-status'); s.className = 'i3d-skp-status ok'; s.textContent = 'Sent to SketchUp';
@@ -233,7 +240,7 @@ function i3dImportSKP() {
       }
       
       var a = document.createElement('a');
-      a.href = i3dGlbUrl;
+      a.href = sgaiMediaURL(i3dGlbUrl);
       a.target = '_blank';
       a.download = 'model.glb';
       document.body.appendChild(a);
@@ -265,14 +272,14 @@ async function i3dGenerate() {
     var meshyBody = i3dMode === 'single'
       ? { image_url: i3dSingleFile, ai_model: document.getElementById('i3d-model').value, topology: document.getElementById('i3d-topology').value, target_polycount: parseInt(document.getElementById('i3d-polycount').value), should_texture: i3dToggles.texture, enable_pbr: i3dToggles.texture && i3dToggles.pbr, should_remesh: i3dToggles.remesh }
       : { image_urls: i3dMultiFiles.filter(Boolean), ai_model: document.getElementById('i3d-model').value, topology: document.getElementById('i3d-topology').value, target_polycount: parseInt(document.getElementById('i3d-polycount').value), should_texture: i3dToggles.texture, enable_pbr: i3dToggles.texture && i3dToggles.pbr, should_remesh: i3dToggles.remesh };
-    var pose = document.getElementById('i3d-pose').value; if (pose) meshyBody.is_a_t_pose = pose;
+    var pose = document.getElementById('i3d-pose').value; if (pose) meshyBody.pose_mode = pose;
     if (i3dToggles.texture) {
       var tp = (document.getElementById('i3d-tex-prompt') || { value: '' }).value || '';
       if (tp.trim()) meshyBody.texture_prompt = tp.trim();
     }
     var body = meshyBody;
     var token = localStorage.getItem('sgai_auth_token');
-    var res = await fetch(i3dServerBase() + '/api/' + ep, {
+    var res = await sgaiPaidFetch(i3dServerBase() + "https://sketchupgurus-ai-server.onrender.com/api/" + ep, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -282,29 +289,31 @@ async function i3dGenerate() {
     });
     var data = await res.json();
     if (res.status === 403 && data.error === 'INSUFFICIENT_FUNDS') {
-      i3dShowError('Not enough credits. Need ' + (data.required || 10) + ', have ' + (data.available || 0) + '.');
+      i3dShowError('Not enough credits. Need ' + (data.required || 10) + '. Please refresh your balance or recharge.');
       btn.disabled = false; i3dUpdateCostBadge(); return;
     }
-    if (!res.ok) throw new Error(data.message || data.error || 'Error ' + res.status);
+    if (!res.ok) throw new Error(sgaiPaidError(data));
     i3dTaskId = data.result; i3dCurrentCost = data.cost || 10;
+    if (typeof syncCredits === 'function') syncCredits();
     document.getElementById('i3d-task-id').textContent = i3dTaskId;
     i3dUpdateStatus('PENDING', 0); btn.textContent = 'Generating...';
     i3dStartPolling(ep, email);
   } catch(err) { i3dShowError(err.message); btn.disabled = false; i3dUpdateCostBadge(); }
 }
 
-function i3dStartPolling(ep, email) {
+function i3dStartPolling(ep, email,session=sgaiCaptureSession()) {
   clearInterval(i3dPollTimer);
   i3dPollTimer = setInterval(async function() {
+    if(!sgaiSessionCurrent(session)){clearInterval(i3dPollTimer);return;}
     try {
       var params = new URLSearchParams({ cost: String(i3dCurrentCost), deducted: i3dCreditDeducted ? '1' : '0' });
       var token = localStorage.getItem('sgai_auth_token');
-      var res = await fetch(i3dServerBase() + '/api/' + ep + '/' + i3dTaskId + '?' + params.toString(), {
+      var res = await fetch(i3dServerBase() + "https://sketchupgurus-ai-server.onrender.com/api/" + ep + '/' + i3dTaskId + '?' + params.toString(), {
         headers: {
           'Authorization': 'Bearer ' + token
         }
       });
-      var task = await res.json(); if (!res.ok) return;
+      var task = await res.json(); if (!res.ok || !sgaiSessionCurrent(session)) return;
       i3dUpdateStatus(task.status, task.progress || 0, task.task_error && task.task_error.message);
       if (task.status === 'SUCCEEDED') {
         clearInterval(i3dPollTimer); i3dShowModel(task);
@@ -327,8 +336,11 @@ function i3dStartPolling(ep, email) {
             }
           );
         }
-      } else if (task.status === 'FAILED') {
-        clearInterval(i3dPollTimer); i3dShowError((task.task_error && task.task_error.message) || 'Generation failed. No credits deducted.');
+      } else if (task.status === 'FAILED' || task.status === 'CANCELED') {
+        clearInterval(i3dPollTimer);
+        i3dShowError(task.billingStatus === 'refunded' ? 'Generation failed. Reserved credits were returned.' :
+          'Generation did not complete. Billing needs review; contact support.' + (task.requestId ? ' Reference: ' + task.requestId : ''));
+        if (typeof syncCredits === 'function') syncCredits();
         var btn = document.getElementById('i3d-gen-btn'); btn.disabled = false; i3dUpdateCostBadge();
       }
     } catch(e) {}
@@ -448,7 +460,7 @@ async function i3dRemoveBackground() {
   
   const token = localStorage.getItem('sgai_auth_token');
   try {
-    const res = await fetch(i3dServerBase() + '/api/remove-bg', {
+    const res = await sgaiPaidFetch(i3dServerBase() + "https://sketchupgurus-ai-server.onrender.com/api/remove-bg", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -459,7 +471,7 @@ async function i3dRemoveBackground() {
     
     const data = await res.json();
     if (!res.ok || data.error) {
-      throw new Error(data.error || "Background removal failed.");
+      throw new Error(sgaiPaidError(data));
     }
     
     // Replace current file with background-removed base64

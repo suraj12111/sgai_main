@@ -48,20 +48,19 @@ window.openBatchRenderModal = function() {
   try {
     if (typeof sketchup !== 'undefined') {
       sketchup.request_scenes();
-      // Set a 3-second timeout. If SketchUp doesn't respond, we mock scenes for convenience.
+      // Missing callbacks must not create chargeable placeholder scenes.
       setTimeout(() => {
         const list = document.getElementById('batch-scenes-list');
         if (list && list.innerHTML.includes('Querying SketchUp scenes')) {
-          console.warn('[Batch] SketchUp scenes request timed out. Loading mock scenes.');
-          window.receiveScenesList(['Scene 1', 'Scene 2', 'Scene 3']);
+          window.receiveScenesList([]);
         }
       }, 3000);
     } else {
-      window.receiveScenesList(['Scene 1', 'Scene 2', 'Scene 3']);
+      window.receiveScenesList([]);
     }
   } catch (e) {
-    console.warn('[Batch] sketchup.request_scenes not bound. Rendering mock scenes.', e.message);
-    window.receiveScenesList(['Scene 1', 'Scene 2', 'Scene 3']);
+    console.warn('[Batch] SketchUp scene callbacks unavailable.', e.message);
+    window.receiveScenesList([]);
   }
 }
 
@@ -99,10 +98,15 @@ window.receiveScenesList = function(scenes) {
   scenes.forEach(scene => {
     const label = document.createElement('label');
     label.style.cssText = 'display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 10px; color: var(--text-main); margin-bottom: 6px; cursor: pointer;';
-    label.innerHTML = `
-      <input type="checkbox" name="batch-scenes-checked" value="${scene}" checked onchange="window.updateBatchCost()">
-      <span>${scene}</span>
-    `;
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.name = 'batch-scenes-checked';
+    input.value = String(scene);
+    input.checked = true;
+    input.addEventListener('change', () => window.updateBatchCost());
+    const name = document.createElement('span');
+    name.textContent = String(scene);
+    label.append(input, name);
     container.appendChild(label);
   });
   
@@ -135,8 +139,8 @@ window.handleBatchFileUpload = function(event) {
       thumb.className = 'batch-file-thumb';
       thumb.style.cssText = 'position: relative; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: #000; overflow: hidden; width: 64px; height: 64px; margin-right: 4px;';
       thumb.innerHTML = `
-        <img src="data:image/jpeg;base64,${b64}" onclick="window.showBatchLightbox('data:image/jpeg;base64,${b64}')" style="width:100%; height:100%; object-fit:cover; opacity:0.8; cursor:pointer;" title="Click to preview">
-        <button onclick="window.removeBatchFile('${fileId}')" style="position:absolute; top:2px; right:2px; width:14px; height:14px; line-height:12px; background:rgba(230,51,41,0.85); color:#fff; border:none; border-radius:50%; font-size:8px; cursor:pointer; text-align:center;">&times;</button>
+        <img src="data:image/jpeg;base64,${sgaiMarkupText(b64)}" data-sg-click="action132" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(b64))}" style="width:100%; height:100%; object-fit:cover; opacity:0.8; cursor:pointer;" title="Click to preview">
+        <button data-sg-click="action133" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(fileId))}" style="position:absolute; top:2px; right:2px; width:14px; height:14px; line-height:12px; background:rgba(230,51,41,0.85); color:#fff; border:none; border-radius:50%; font-size:8px; cursor:pointer; text-align:center;">&times;</button>
       `;
       if (fileGrid) fileGrid.appendChild(thumb);
       
@@ -172,8 +176,8 @@ window.addCapturedScreenshotToBatch = function(b64) {
     thumb.className = 'batch-screenshot-thumb';
     thumb.style.cssText = 'position: relative; border-radius: 6px; border: 1px solid rgba(0, 229, 255, 0.15); background: #000; overflow: hidden; width: 64px; height: 64px; margin-right: 4px;';
     thumb.innerHTML = `
-      <img src="data:image/jpeg;base64,${b64}" onclick="window.showBatchLightbox('data:image/jpeg;base64,${b64}')" style="width:100%; height:100%; object-fit:cover; opacity:0.8; cursor:pointer;" title="Click to preview">
-      <button onclick="window.removeBatchScreenshot('${fileId}')" style="position:absolute; top:2px; right:2px; width:14px; height:14px; line-height:12px; background:rgba(230,51,41,0.85); color:#fff; border:none; border-radius:50%; font-size:8px; cursor:pointer; text-align:center;">&times;</button>
+      <img src="data:image/jpeg;base64,${sgaiMarkupText(b64)}" data-sg-click="action134" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(b64))}" style="width:100%; height:100%; object-fit:cover; opacity:0.8; cursor:pointer;" title="Click to preview">
+      <button data-sg-click="action135" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(fileId))}" style="position:absolute; top:2px; right:2px; width:14px; height:14px; line-height:12px; background:rgba(230,51,41,0.85); color:#fff; border:none; border-radius:50%; font-size:8px; cursor:pointer; text-align:center;">&times;</button>
     `;
     grid.appendChild(thumb);
   }
@@ -270,7 +274,7 @@ window.updateBatchCost = function() {
 
 // Switch callback from Ruby containing viewport scene capture
 window.receiveSceneCapture = function(b64Data, sceneName) {
-  const cleanB64 = b64Data.replace(/^data:image\/\w+;base64,/, '');
+  const cleanB64 = typeof b64Data === 'string' ? b64Data.replace(/^data:image\/\w+;base64,/, '') : null;
   if (window._batchSceneResolver) {
     window._batchSceneResolver(cleanB64);
     window._batchSceneResolver = null;
@@ -285,8 +289,8 @@ window.captureWorkflowScene = function(sceneName) {
     // Safety timeout to prevent locking if Ruby doesn't respond
     const safetyTimeout = setTimeout(() => {
       if (window._batchSceneResolver) {
-        console.warn(`[Batch] Scene capture timeout for: ${sceneName}. Using canvas placeholder.`);
-        resolve("data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==");
+        console.warn(`[Batch] Scene capture timeout for: ${sceneName}.`);
+        resolve(null);
         window._batchSceneResolver = null;
       }
     }, 15000);
@@ -301,12 +305,9 @@ window.captureWorkflowScene = function(sceneName) {
         window._batchSceneResolver = null;
       }
     } else {
-      // Browser Mock capture response
-      setTimeout(() => {
-        clearTimeout(safetyTimeout);
-        resolve("data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==");
-        window._batchSceneResolver = null;
-      }, 1000);
+      clearTimeout(safetyTimeout);
+      resolve(null);
+      window._batchSceneResolver = null;
     }
   });
 }
@@ -373,7 +374,7 @@ window.startBatchRender = async function() {
     row.id = `batch-row-${index}`;
     row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:10px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04);';
     row.innerHTML = `
-      <span style="color:var(--text-main); font-weight:700;">${item.name}</span>
+      <span style="color:var(--text-main); font-weight:700;">${sgaiMarkupText(item.name)}</span>
       <span id="batch-status-lbl-${index}" style="color:var(--text-muted);">Pending</span>
     `;
     statusContainer.appendChild(row);
@@ -420,7 +421,9 @@ window.startBatchRender = async function() {
   const fullPromptText = `${combinedPrompt}. Style: ${presetStyle}. Environment: ${presetEnv}.${backdropPrompt}${matPrompt} ${geoPrompt}${negPromptString}${qualitySuffix}`;
   
   const token = localStorage.getItem('sgai_auth_token');
-  const SERVER = (document.getElementById('i3d-server-url') || {value:'http://localhost:3000'}).value.replace(/\/$/, '') || 'http://localhost:3000';
+  const SERVER = (typeof i3dServerBase === 'function')
+    ? i3dServerBase()
+    : (window.SGAI_API_ORIGIN || location.origin).replace(/\/+$/, '');
   
   // Sequential batch processing loop
   for (let i = 0; i < items.length; i++) {
@@ -469,7 +472,7 @@ window.startBatchRender = async function() {
     };
     
     try {
-      const res = await fetch(`${SERVER}/api/generate`, {
+      const res = await sgaiPaidFetch(`${SERVER}/api/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -479,9 +482,10 @@ window.startBatchRender = async function() {
       });
       
       const data = await res.json();
+      if (typeof handleAuthFailure === 'function' && handleAuthFailure(res)) return;
       
       if (!res.ok || !data.data || !data.data.candidates) {
-        throw new Error(data.error || 'Server Generation Failed');
+        throw new Error(sgaiPaidError(data));
       }
       
       const outputB64 = data.data.candidates[0].content.parts[0].inlineData.data;
@@ -491,7 +495,7 @@ window.startBatchRender = async function() {
         window.saveToHistory(
           base64Image,
           outputB64,
-          `[Batch: ${item.name}] ${batchPrompt}`,
+          `[Batch: ${sgaiMarkupText(item.name)}] ${batchPrompt}`,
           window.capturedAspectRatio || (16/9)
         );
       }
@@ -500,17 +504,17 @@ window.startBatchRender = async function() {
       const thumb = document.createElement('div');
       thumb.style.cssText = 'position: relative; border-radius: 6px; border: 1px solid rgba(0, 229, 255, 0.2); background: #000; overflow: hidden; display: flex; align-items:center; justify-content:center;';
       thumb.innerHTML = `
-        <img src="data:image/jpeg;base64,${outputB64}" onclick="window.showBatchLightbox('data:image/jpeg;base64,${outputB64}')" style="width:100%; height:100%; object-fit:cover; cursor:pointer;" title="Click to view full size">
-        <div style="position:absolute; bottom:4px; left:4px; font-family:var(--font-mono); font-size:7px; color:#fff; background:rgba(8,10,15,0.85); padding:2px 4px; border-radius:3px; border:1px solid rgba(255,255,255,0.1);">${item.name}</div>
+        <img src="data:image/jpeg;base64,${sgaiMarkupText(outputB64)}" data-sg-click="action136" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(outputB64))}" style="width:100%; height:100%; object-fit:cover; cursor:pointer;" title="Click to view full size">
+        <div style="position:absolute; bottom:4px; left:4px; font-family:var(--font-mono); font-size:7px; color:#fff; background:rgba(8,10,15,0.85); padding:2px 4px; border-radius:3px; border:1px solid rgba(255,255,255,0.1);">${sgaiMarkupText(item.name)}</div>
       `;
       galleryContainer.appendChild(thumb);
       
-      statusLbl.innerText = 'Completed ✅';
+      statusLbl.innerText = sgaiCloudCompletion(data,'Completed ✅');
       statusLbl.style.color = 'var(--accent-green)';
       
     } catch (err) {
-      console.error(`[Batch] Rendering failed for ${item.name}:`, err.message);
-      statusLbl.innerText = 'Failed ❌';
+      console.error(`[Batch] Rendering failed for ${sgaiMarkupText(item.name)}:`, err.message);
+      statusLbl.innerText = 'Failed: ' + err.message;
       statusLbl.style.color = 'var(--danger)';
     }
     

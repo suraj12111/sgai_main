@@ -10,12 +10,12 @@ function displayDraftGrid(draftsArray) {
   const c = document.getElementById('results-container');
   let gridImages = draftsArray.map((b64, index) => `
     <div style="position:relative;width:100%;">
-      <img src="data:image/png;base64,${b64}" class="draft-item" id="draft-img-${index}"
-        onclick="selectDraft(${index})" style="aspect-ratio:${capturedAspectRatio};">
-      <a href="data:image/png;base64,${b64}" download="SGAI_Render_${index+1}.png"
+      <img src="data:image/png;base64,${sgaiMarkupText(b64)}" class="draft-item" id="draft-img-${index}"
+        data-sg-click="action141" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(index))}" style="aspect-ratio:${sgaiAspectRatio(capturedAspectRatio)};">
+      <a href="data:image/png;base64,${sgaiMarkupText(b64)}" download="SGAI_Render_${index+1}.png"
         style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.8);color:white;padding:6px 12px;font-size:10px;text-transform:uppercase;font-weight:bold;text-decoration:none;border:1px solid var(--border-color);border-radius:4px;z-index:10;transition:0.2s;"
-        onmouseover="this.style.borderColor='var(--accent-primary)';this.style.color='var(--accent-primary)';"
-        onmouseout="this.style.borderColor='var(--border-color)';this.style.color='white';">⬇ Save</a>
+        data-sg-mouseover="action142"
+        data-sg-mouseout="action143">⬇ Save</a>
     </div>`).join('');
 
   c.innerHTML = `
@@ -55,7 +55,7 @@ function displayResult(orig, gen, aspectRatio) {
     c.innerHTML = '<div style="font-family:var(--font-mono);font-size:10px;color:var(--danger);text-align:center;padding:24px;">This history item has no render preview data.</div>';
     return;
   }
-  const safeAspect = aspectRatio || capturedAspectRatio || (16 / 9);
+  const safeAspect = sgaiAspectRatio(aspectRatio || capturedAspectRatio);
   const origSrc = imageSrcFromData(origData, 'image/jpeg');
   const genSrc  = imageSrcFromData(genData,  'image/png');
   const maxW = 800;
@@ -65,33 +65,33 @@ function displayResult(orig, gen, aspectRatio) {
       <div id="render-view-mode" style="width:100%;max-width:${maxW}px;margin:0 auto;">
 
         <div class="slider-container" style="border-radius:8px;position:relative;overflow:hidden;aspect-ratio:${safeAspect};background:#05070a;">
-          <img class="img-original" src="${origSrc}" style="width:100%;height:100%;display:block;object-fit:cover;filter:grayscale(30%);opacity:0.8;">
-          <img class="img-generated" src="${genSrc}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;clip-path:polygon(0 0,50% 0,50% 100%,0 100%);">
+          <img class="img-original" src="${sgaiMarkupText(origSrc)}" style="width:100%;height:100%;display:block;object-fit:cover;filter:grayscale(30%);opacity:0.8;">
+          <img class="img-generated" src="${sgaiMarkupText(genSrc)}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;clip-path:polygon(0 0,50% 0,50% 100%,0 100%);">
           <div class="slider-line" style="position:absolute;top:0;bottom:0;left:50%;width:2px;background:var(--accent-primary);pointer-events:none;z-index:5;">
             <div class="slider-handle" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:var(--accent-primary);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(0,229,255,0.5);">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:#000;"><polyline points="15 18 9 12 15 6"/><polyline points="9 18 3 12 9 6" transform="translate(6,0)"/></svg>
             </div>
           </div>
-          <input type="range" class="slider-control" min="0" max="100" value="50" oninput="updateSlider(this)"
+          <input type="range" class="slider-control" min="0" max="100" value="50" data-sg-input="action144"
             style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:ew-resize;z-index:10;margin:0;">
         </div>
 
         <div style="display:flex;gap:10px;margin-top:10px;justify-content:center;flex-wrap:wrap;">
-          <a id="inline-export-btn" class="btn-secondary" href="${genSrc}" download="SGAI_Render.png"
+          <a id="inline-export-btn" class="btn-secondary" href="${sgaiMarkupText(genSrc)}" download="SGAI_Render.png"
             style="display:flex;align-items:center;justify-content:center;flex:1;min-width:140px;max-width:220px;">⬇ Save Image</a>
           <button id="inline-modify-btn" class="btn-secondary"
-            style="border-color:var(--accent-primary);color:var(--accent-primary);flex:1;min-width:140px;max-width:220px;"
-            onclick="enterEditMode()">✏️ Modify Region (1 CR)</button>
+            style="border-color:var(--accent-primary);color:#ffffff;flex:1;min-width:140px;max-width:220px;"
+            data-sg-click="action145">✏️ Modify Region (1 CR)</button>
           <button id="inline-animate-btn" class="btn-secondary"
-            onclick="vidRenderFromResult('${genData}')"
+            data-sg-click="action146" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(genData))}"
             style="border-color:rgba(217,70,239,0.7);color:rgba(217,70,239,1);background:rgba(217,70,239,0.08);flex:1;min-width:140px;max-width:240px;display:flex;align-items:center;gap:6px;justify-content:center;">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
             Render with Veo (10 CR)
           </button>
-          <button id="inline-upscale-btn" class="btn-secondary" onclick="upscaleRender('${genData}')"
+          <button id="inline-upscale-btn" class="btn-secondary" data-sg-click="action147" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(genData))}"
             style="border-color:rgba(0,229,160,0.6);color:#00e5a0;background:rgba(0,229,160,0.07);flex:1;min-width:140px;max-width:220px;display:flex;align-items:center;gap:6px;justify-content:center;">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-            Upscale 4x (1 CR)
+            Upscale 4x (0.3 CR)
           </button>
         </div>
 
@@ -115,9 +115,9 @@ function displayResult(orig, gen, aspectRatio) {
             style="width:100%;padding:10px;background:var(--input-bg);border:1px solid rgba(16,185,129,0.3);color:var(--text-main);border-radius:4px;font-family:inherit;font-size:0.88em;line-height:1.5;resize:vertical;min-height:60px;box-sizing:border-box;outline:none;margin-bottom:10px;"></textarea>
           <div style="font-size:0.7em;color:var(--text-muted);margin-bottom:12px;">Leave blank for smart architectural default.</div>
           <div style="display:flex;gap:8px;">
-            <button onclick="startAnimate('${genData}')"
+            <button data-sg-click="action148" data-sg-arg-0="${sgaiMarkupText(JSON.stringify(genData))}"
               style="flex:2;padding:11px;background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.4);cursor:pointer;font-weight:700;font-size:0.88em;text-transform:uppercase;letter-spacing:0.5px;border-radius:4px;transition:0.2s;">▶ Generate Animation</button>
-            <button onclick="document.getElementById('animate-panel').style.display='none'"
+            <button data-sg-click="action149"
               style="flex:1;padding:11px;background:transparent;color:var(--text-muted);border:1px solid var(--border-color);cursor:pointer;font-size:0.82em;border-radius:4px;">Cancel</button>
           </div>
         </div>
@@ -208,7 +208,7 @@ async function submitEdit() {
       ]}]}
     };
     const token = localStorage.getItem('sgai_auth_token');
-    const r = await fetch(SERVER_URL + '/generate', {
+    const r = await sgaiPaidFetch(SERVER_URL + '/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -218,12 +218,13 @@ async function submitEdit() {
     });
     const d = await r.json();
     if (r.status === 403) return showPaywall();
+    if (!r.ok || d.error) throw new Error(sgaiPaidError(d));
     const gen = d.data.candidates[0].content.parts[0].inlineData.data;
     displayResult(currentEditBase64, gen, capturedAspectRatio);
     saveToHistory(currentEditBase64, gen, "[EDIT] " + p, capturedAspectRatio);
     syncCredits();
-  } catch(e) {}
-  finally { document.getElementById('status').innerText = "Complete."; }
+    document.getElementById('status').innerText = sgaiCloudCompletion(d,"Complete.");
+  } catch(e) { document.getElementById('status').innerText = e.message || 'Edit failed.'; }
 }
 
 // ── ANIMATE ───────────────────────────────────────────
@@ -276,13 +277,13 @@ async function startAnimate(gen) {
         <video id="sgai-anim-video" controls autoplay loop muted playsinline preload="auto"
           style="width:100%;border-radius:8px;border:1px solid rgba(16,185,129,0.3);display:block;max-height:360px;background:#000;outline:none;"></video>
         <div style="display:flex;gap:8px;margin-top:8px;">
-          <button id="vid-play-btn-anim" onclick="sgaiVideoPlay('sgai-anim-video','vid-play-btn-anim')"
+          <button id="vid-play-btn-anim" data-sg-click="action150"
             style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(16,185,129,0.3);background:transparent;color:#10b981;font-family:var(--font-mono);font-size:10px;letter-spacing:1px;cursor:pointer;">
             &#9654; PLAY
           </button>
         </div>
         <div style="display:flex;gap:10px;margin-top:10px;justify-content:center;">
-          <a href="${data.videoUrl}" download="SGAI_Animation.mp4"
+          <a href="${sgaiMarkupText(sgaiMediaURL(data.videoUrl))}" download="SGAI_Animation.mp4"
             style="display:flex;align-items:center;justify-content:center;flex:1;max-width:220px;padding:10px;border:1px solid rgba(16,185,129,0.4);color:#10b981;text-decoration:none;font-size:0.82em;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;border-radius:4px;">⬇ Download Video</a>
         </div>
       </div>`;
@@ -318,10 +319,13 @@ function upscaleRender(genB64) {
   if (spinnerEl) { spinnerEl.style.display = ''; spinnerEl.textContent = 'Running Real-ESRGAN 4x...'; }
   setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
 
-  const SERVER = (document.getElementById('i3d-server-url') || {value:'http://localhost:3000'}).value.replace(/\/$/, '') || 'http://localhost:3000';
-
   const token = localStorage.getItem('sgai_auth_token');
-  fetch(SERVER + '/api/upscale', {
+  if (!token) {
+    if (spinnerEl) spinnerEl.style.display = 'none';
+    if (statusEl) statusEl.textContent = 'Your session has ended. Please sign in again.';
+    return;
+  }
+  return sgaiPaidFetch("https://sketchupgurus-ai-server.onrender.com/api/upscale", {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -329,26 +333,34 @@ function upscaleRender(genB64) {
     },
     body: JSON.stringify({ imageBase64: genB64 })
   })
-  .then(res => res.json())
+  .then(async res => {
+    const data = await res.json();
+    if (!res.ok && !data.error) throw new Error('Upscale request failed (HTTP ' + res.status + ').');
+    return data;
+  })
   .then(data => {
     if (data.error === 'INSUFFICIENT_FUNDS') {
       if (spinnerEl) spinnerEl.style.display = 'none';
-      if (statusEl) { statusEl.textContent = 'Not enough credits'; statusEl.style.color = 'var(--danger)'; }
+      if (statusEl) {
+        statusEl.textContent = 'Not enough SGAI credits. Please refresh your balance or recharge.';
+        statusEl.style.color = 'var(--danger)';
+      }
+      if (typeof syncCredits === 'function') syncCredits();
       panel.style.borderColor = 'rgba(255,79,112,0.3)'; return;
     }
     if (data.error) {
       if (spinnerEl) spinnerEl.style.display = 'none';
-      if (statusEl) { statusEl.textContent = 'Error: ' + data.error; statusEl.style.color = 'var(--danger)'; }
+      if (statusEl) { statusEl.textContent = 'Error: ' + (data.message || data.error) + (data.requestId ? ' Reference: ' + data.requestId : ''); statusEl.style.color = 'var(--danger)'; }
       return;
     }
     if (spinnerEl) spinnerEl.style.display = 'none';
-    if (statusEl) { statusEl.textContent = 'Done — 4x upscaled'; statusEl.style.color = '#00e5a0'; }
+    if (statusEl) { statusEl.textContent = sgaiCloudCompletion(data,'Done — 4x upscaled.'); statusEl.style.color = '#00e5a0'; }
     const imgSrc = data.upscaledUrl ? data.upscaledUrl : 'data:image/png;base64,' + data.upscaledBase64;
     if (imgWrap) {
       imgWrap.innerHTML =
-        '<img class="upscale-img-out" src="' + imgSrc + '" alt="4x Upscaled">' +
+        '<img class="upscale-img-out" src="' + sgaiMarkupText(sgaiMediaURL(imgSrc)) + '" alt="4x Upscaled">' +
         '<div class="upscale-actions">' +
-          '<a class="upscale-save-btn" href="' + imgSrc + '" download="SGAI_4K_Upscaled.png">' +
+          '<a class="upscale-save-btn" href="' + sgaiMarkupText(sgaiMediaURL(imgSrc)) + '" download="SGAI_4K_Upscaled.png">' +
             '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
             '&#11015; Save 4K Image' +
           '</a>' +
@@ -358,6 +370,7 @@ function upscaleRender(genB64) {
       const cc = document.getElementById('credit-counter');
       if (cc) cc.innerText = parseFloat(data.creditsLeft).toFixed(1) + ' CR';
     }
+    if (typeof syncCredits === 'function') syncCredits();
   })
   .catch(err => {
     if (spinnerEl) spinnerEl.style.display = 'none';
