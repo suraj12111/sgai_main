@@ -1,0 +1,8 @@
+:root { color-scheme: dark; font-family: Arial, sans-serif; background: #101112; color: #f3f4f5; }
+body { margin: 0; padding: 48px 20px; }
+main { max-width: 440px; margin: 0 auto; }
+h1 { font-size: 26px; letter-spacing: 0; }
+p { line-height: 1.6; color: #c2c5c9; overflow-wrap: anywhere; }
+#code { display: block; font-size: 28px; margin: 24px 0; }
+button { background: #c62342; color: white; border: 0; border-radius: 6px; padding: 14px 20px; cursor: pointer; }
+button:disabled { opacity: .6; }

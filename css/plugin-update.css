@@ -1,0 +1,8 @@
+.plugin-update-banner[hidden],.plugin-update-banner [hidden]{display:none!important}
+.plugin-update-banner{position:fixed;right:16px;bottom:16px;z-index:6000;box-sizing:border-box;width:390px;max-width:calc(100vw - 32px);padding:15px 38px 14px 16px;background:#151922;color:#f3f4f6;border:1px solid #b64b5a;border-radius:10px;box-shadow:0 8px 28px #0008;font-family:Inter,Arial,sans-serif;font-size:12px;line-height:1.5}
+.plugin-update-banner strong{display:block;font-size:14px}.plugin-update-banner p{margin:5px 0 10px;color:#d6d9e0}
+.plugin-update-dismiss{position:absolute;right:7px;top:6px;width:28px;height:28px;border:0;background:transparent;color:#d6d9e0;cursor:pointer;font-size:23px;line-height:1}
+.plugin-update-actions{display:flex;align-items:center;flex-wrap:wrap;gap:9px}.plugin-update-download,.plugin-update-actions button{padding:7px 10px;border-radius:5px;font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
+.plugin-update-download{background:#c92943;color:#fff;border:1px solid #c92943}.plugin-update-actions button{background:transparent;color:#f3f4f6;border:1px solid #717888}
+.plugin-update-banner .plugin-update-help{font-size:11px;color:#c1c6d0;margin:9px 0 0}.plugin-update-banner input{box-sizing:border-box;width:100%;margin-top:7px;padding:7px;border:1px solid #717888;border-radius:4px;background:#0c1016;color:#fff;font-size:11px}
+.plugin-update-banner a:focus-visible,.plugin-update-banner button:focus-visible,.plugin-update-banner input:focus-visible{outline:2px solid #fff;outline-offset:3px}
