@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="../js/site-config.js?v=18d41a019312"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SG 3D Engine — Workspace</title>
+  <link rel="stylesheet" href="dashboard.css?v=b2b76ce9c20b">
+  <script src="model-viewer.js?v=39dead986ce7" defer></script>
+  <script src="preview.js?v=c7ffc91cd2d3" defer></script>
+  <script src="../js/account-session.js?v=894e711c58aa" defer></script>
+  <script src="server-client.js?v=d186aabc9644" defer></script>
+  <script src="dashboard.js?v=f37808361d2d" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="SG 3D Engine">
+        <span class="brand-mark" aria-hidden="true">SG<span>↗</span></span>
+        <span class="brand-wordmark">3D ENGINE<small>IMAGE TO OBJECT</small></span>
+      </div>
+      <div class="workspace-name"><span class="divider"></span>SketchUp workspace<span class="workspace-tag">STUDIO</span></div>
+      <div class="topbar-end">
+        <span class="connection-pill"><span class="status-dot"></span>Tripo AI</span>
+        <details id="accountSettings" class="account-settings">
+          <summary><span class="account-icon" aria-hidden="true">◎</span> Account <span aria-hidden="true">⌄</span></summary>
+          <div class="account-popover">
+            <h2>SGAI account</h2>
+            <p class="help-text">Uses your signed-in SGAI account and credits.</p>
+            <label for="deviceId">Signed-in account</label>
+            <input type="text" id="deviceId" readonly aria-label="Signed-in account" style="width:100%;font-size:10px;padding:8px">
+            <p id="keyState" class="help-text">Checking account…</p>
+            <div class="account-actions"><button type="button" id="activateBtn" class="text-button">Refresh account / assets</button></div>
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <nav class="tool-rail" aria-label="Workspace shortcuts">
+        <button type="button" id="railGenerate" class="rail-button active" title="Generation settings" aria-label="Go to generation settings"><span aria-hidden="true">✦</span><small>Create</small></button>
+        <button type="button" id="railAssets" class="rail-button" title="Session assets" aria-label="Show session assets"><span aria-hidden="true">▦</span><small>Assets</small></button>
+        <button type="button" id="railProperties" class="rail-button" title="Import properties" aria-label="Show import properties"><span aria-hidden="true">☷</span><small>Setup</small></button>
+        <div class="rail-spacer"></div>
+        <button type="button" id="railAccount" class="rail-button" title="Account settings" aria-label="Open account settings"><span aria-hidden="true">◎</span><small>Account</small></button>
+      </nav>
+
+      <section id="generationPane" class="generation-pane" aria-labelledby="generationTitle">
+        <div class="pane-heading"><span class="eyebrow">01 / CREATE</span><h1 id="generationTitle">Generate model<span class="red-dot" aria-hidden="true"></span></h1><p>Turn a reference into your next 3D asset.</p></div>
+        <div class="generation-scroll">
+          <div class="mode-tabs" role="tablist" aria-label="Generation mode">
+            <button type="button" class="mode-tab active" id="tab-single" role="tab" aria-controls="panel-single" aria-selected="true" tabindex="0">Single image</button>
+            <button type="button" class="mode-tab" id="tab-multi" role="tab" aria-controls="panel-multi" aria-selected="false" tabindex="-1">Multi-view</button>
+          </div>
+          <div class="panel active" id="panel-single" role="tabpanel" aria-labelledby="tab-single">
+            <div class="drop-zone" id="singleDropZone" role="button" tabindex="0" aria-label="Choose or drop a reference image" aria-disabled="false" aria-busy="false">
+              <span class="upload-icon" aria-hidden="true">↥</span>
+              <strong>Drop a reference image</strong><span class="drop-sub">or click to browse</span>
+              <span class="file-types">JPG · PNG · WEBP</span>
+            </div>
+            <input type="file" id="singleInput" accept="image/png,image/jpeg,image/webp" hidden>
+            <div class="preview-box" id="singlePreviewBox" style="display:none">
+              <img id="singlePreviewImg" alt="Selected reference" class="preview-thumb">
+              <div class="preview-info"><strong id="singleFileName"></strong><span id="singleFileSize"></span></div>
+              <button type="button" id="removeSingle" class="remove-button" aria-label="Remove selected reference" title="Remove reference">×</button>
+            </div>
+          </div>
+          <div class="panel" id="panel-multi" role="tabpanel" aria-labelledby="tab-multi">
+            <div class="multi-grid" id="multiSlotsContainer"></div>
+            <input type="file" id="multiInput" accept="image/png,image/jpeg,image/webp" hidden>
+            <p class="help-text">Front + at least one other view. Use the same object and consistent lighting.</p>
+          </div>
+          <p id="fileStatus" class="file-status" role="status"></p>
+          <p class="upload-limit">Up to 20 MB · 40 MP · WebP converted to PNG</p>
+
+          <div class="section-heading"><h2>Generation settings</h2><span aria-hidden="true">↙</span></div>
+          <div class="field">
+            <label for="aiModel">AI model</label>
+            <select id="aiModel"><option value="v3.1-20260211" selected>H3.1 — High precision</option><option value="v3.0-20250812">H3.0 — Stable</option><option value="v2.5-20250123">H2.5 — Legacy</option><option value="P1-20260311">P1 — Clean low-poly</option><option value="P2-20260801">P2 — Clean mesh (Preview)</option></select>
+            <p id="modelGuide" class="setting-guide">H3.1 preserves fine geometry; P-series favors clean low-poly meshes.</p>
+            <p id="versionGuide" class="setting-guide">Pinned version: v3.1-20260211.</p>
+          </div>
+          <div class="field">
+            <label for="geometryQuality">Geometry detail</label>
+            <select id="geometryQuality"><option value="detailed" selected>Ultra — Finer geometry</option><option value="standard">Standard — Faster</option></select>
+          </div>
+          <div class="field">
+            <label for="faceLimit">Target face count</label>
+            <input type="number" id="faceLimit" min="0" max="2000000" step="1" value="100000">
+            <p id="faceRange" class="setting-guide">0 = adaptive. Larger budgets retain more detail but can make SketchUp slower.</p>
+          </div>
+          <div class="quality-note"><strong>For a faithful shape</strong><p>Use a clear, complete subject on a clean background. Front, side and back images help resolve hidden geometry. Aim for at least 256 × 256 px.</p></div>
+          <div class="field">
+            <label for="meshStyle">Mesh style</label>
+            <select id="meshStyle"><option value="standard" selected>Detailed surface</option><option value="smart_low_poly">Smart low-poly — Simple objects</option></select>
+          </div>
+          <div class="material-settings">
+            <div class="toggle-row"><div><strong>Color textures</strong><span>Surface color from your images</span></div><button type="button" class="switch on" id="toggle-texture" role="switch" aria-label="Generate textures" aria-checked="true"></button></div>
+            <div class="toggle-row" id="pbrRow"><div><strong>PBR materials</strong><span>Normal, roughness &amp; metallic</span></div><button type="button" class="switch on" id="toggle-pbr" role="switch" aria-label="Generate PBR materials" aria-checked="true"></button></div>
+          </div>
+          <div class="field"><label for="textureQuality">Texture detail</label><select id="textureQuality"><option value="detailed" selected>Detailed — Higher fidelity</option><option value="standard">Standard — Balanced</option><option value="extreme">Extreme — 8K, extra credits</option><option value="fast">Fast — Less texture detail</option></select><p id="qualityCost" class="setting-guide">Higher detail can take longer. Extreme textures use additional credits.</p></div>
+          <details class="advanced-settings"><summary>Reference &amp; material controls</summary>
+            <div class="field"><label for="textureVersion">Texture engine</label><select id="textureVersion"><option value="v3.5-20260815" selected>v3.5 — Latest</option><option value="v3.0-20250812">v3.0 — Stable</option><option value="v2.5-20250123">v2.5 — Legacy</option><option value="auto">Automatic for this model</option></select></div>
+            <div class="field"><label for="textureAlignment">Texture priority</label><select id="textureAlignment"><option value="original_image" selected>Match reference colors</option><option value="geometry">Match generated geometry</option></select></div>
+            <div class="field"><label for="orientation">Model orientation</label><select id="orientation"><option value="align_image" selected>Align to reference viewpoint</option><option value="default">Automatic</option></select><p class="setting-guide">Reference alignment applies when textures are on.</p></div>
+            <label class="check-row"><input id="delight" type="checkbox" checked><span>Remove baked-in lighting<small>Uses the latest texture engine.</small></span></label>
+            <label class="check-row"><input id="imageAutofix" type="checkbox"><span>Enhance reference with AI<small>Single image only. May reinterpret details; leave off to preserve the reference.</small></span></label>
+            <label class="check-row"><input id="autoSize" type="checkbox"><span>Estimate real-world size<small>Estimated in meters. Calibrate with a measured height before architectural use.</small></span></label>
+            <label class="check-row"><input id="exportUv" type="checkbox" checked><span>Export UV coordinates</span></label>
+            <div class="field"><label for="modelSeed">Geometry seed (optional)</label><input id="modelSeed" type="number" min="0" max="2147483647" step="1" placeholder="Random"><p class="setting-guide">Same images, settings and seed reproduce geometry.</p></div>
+            <div class="field"><label for="textureSeed">Texture seed (optional)</label><input id="textureSeed" type="number" min="0" max="2147483647" step="1" placeholder="Random"></div>
+          </details>
+          <p class="setting-guide output-guide">Output: triangle GLB for SketchUp. Quad, parts and mesh compression are excluded from this import workflow. Downloads are limited to 96 MB.</p>
+        </div>
+        <div class="generation-footer"><strong id="creditEstimate" aria-live="polite">Credit estimate loading…</strong><p id="creditBreakdown"></p><p>SGAI credit prices are checked before submission.<br>Images go to Tripo. Generation uses your SGAI credits.</p><button type="button" class="primary-button generate-button" id="generateBtn" disabled>Generate 3D model</button></div>
+      </section>
+
+      <section class="canvas-pane" aria-label="Asset preview workspace">
+        <div class="canvas-heading"><div><span class="eyebrow">02 / PREVIEW</span><h2 id="stageTitle">Your next creation</h2></div><span id="stageBadge" class="stage-badge">EMPTY</span></div>
+        <div class="viewport" id="previewViewport">
+          <div class="viewport-grid" aria-hidden="true"></div>
+          <div class="axis-marker" aria-hidden="true"><span class="axis-z">Z</span><span class="axis-x">X</span><span class="axis-y">Y</span></div>
+          <div id="emptyStage" class="empty-stage">
+            <svg class="empty-cube" width="156" height="170" viewBox="0 0 156 170" fill="none" aria-hidden="true"><path d="M78 12 142 48v74l-64 37-64-37V48L78 12Z" stroke="currentColor" stroke-width="1.5"/><path d="m14 48 64 38 64-38M78 86v73" stroke="currentColor" stroke-width="1.5"/><path d="m78 12 1 74" stroke="currentColor" stroke-dasharray="4 5"/><path d="m14 122 65-36 63 36" stroke="currentColor" stroke-dasharray="4 5"/><circle cx="78" cy="86" r="5" fill="#ed2939"/></svg>
+            <span class="eyebrow">FROM REFERENCE TO REALITY</span><h3>A space for your ideas.</h3><p>Add an image on the left.<br>Your generated preview will appear here.</p>
+          </div>
+          <img id="sourceStageImage" class="stage-image" alt="Reference image preview" hidden>
+          <img id="modelThumbnail" class="stage-image" alt="Generated model image preview" hidden>
+          <canvas id="modelCanvas" class="model-canvas" tabindex="0" aria-label="Interactive 3D model. Drag or arrow keys to rotate, scroll or plus/minus to zoom, right-drag to pan, F to reset view." hidden></canvas>
+          <div class="viewer-status"><p id="viewerStatus" role="status" hidden></p><button type="button" id="reloadPreview" class="secondary-button" hidden>Reload 3D preview</button></div>
+          <div id="thumbnailFallback" class="thumbnail-fallback" hidden><span aria-hidden="true">◇</span><h3>Your model is ready.</h3><p>The service did not provide a preview image.<br>You can still save or import the GLB.</p></div>
+          <div class="preview-tools" aria-label="Preview controls"><button type="button" id="zoomOut" class="icon-button" aria-label="Zoom preview out" title="Zoom out" disabled>−</button><span id="zoomLabel">100%</span><button type="button" id="zoomIn" class="icon-button" aria-label="Zoom preview in" title="Zoom in" disabled>+</button><span class="toolbar-divider"></span><button type="button" id="fitPreview" class="text-button" disabled>Reset view</button></div>
+          <span id="previewCaption" class="preview-caption">Generate a model for an interactive 3D preview</span>
+        </div>
+        <div id="resultSection" class="result-section">
+          <div id="progressCard" class="progress-card" style="display:none">
+            <div class="progress-top"><span id="progressMessage" role="status">Preparing task…</span><span id="statusBadge" class="status-badge queued">queued</span></div>
+            <div class="progress-bottom"><div id="progressTrack" class="progress-track" role="progressbar" aria-label="Cloud generation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressFill" class="progress-fill"></div></div><span id="progressPercent">0%</span><button type="button" id="stopPollingBtn" class="text-button" hidden>Stop checking</button></div>
+          </div>
+          <div class="error-card" id="errorCard" role="alert" style="display:none"><span aria-hidden="true">!</span><p id="errorMessage"></p></div>
+          <div id="resumeControls" class="resume-controls" hidden><button type="button" id="resumeBtn" class="secondary-button">Resume checking</button><button type="button" id="newJobBtn" class="text-button">New generation ↗</button></div>
+          <div id="importStatusBanner" class="import-status" role="status" style="display:none"></div>
+        </div>
+        <div class="canvas-footer"><span class="canvas-footer-note"><span class="status-dot"></span><span id="canvasState">Waiting for a reference</span></span><div class="asset-actions"><button type="button" id="copyUrlBtn" class="icon-button" disabled aria-label="Copy model link" title="Copy model link">↗</button><button type="button" id="downloadGlbBtn" class="secondary-button" disabled>Save GLB ↓</button><button type="button" id="importBtn" class="primary-button" disabled>Import to SketchUp ↗</button></div></div>
+        <input id="modelLink" class="model-link" type="text" readonly aria-label="Model link to copy" hidden>
+      </section>
+
+      <aside id="inspectorPane" class="inspector-pane" aria-label="Asset details">
+        <div class="inspector-tabs" role="tablist" aria-label="Asset inspector"><button type="button" id="inspectorPropertiesTab" class="inspector-tab active" role="tab" aria-selected="true" aria-controls="propertiesPanel">Properties</button><button type="button" id="inspectorAssetsTab" class="inspector-tab" role="tab" aria-selected="false" aria-controls="assetsPanel" tabindex="-1">Assets <span id="assetCount" class="count-badge">0</span></button></div>
+        <section id="propertiesPanel" class="inspector-panel" role="tabpanel" aria-labelledby="inspectorPropertiesTab">
+          <div class="inspector-heading"><span class="eyebrow">03 / BRING IT IN</span><h2>Make it fit.</h2><p>Set the size and orientation for your SketchUp model.</p></div>
+          <div class="task-card"><span class="label">CURRENT TASK</span><span id="taskIdDisplay">—</span></div>
+          <div id="propertyPlaceholder" class="property-placeholder"><span aria-hidden="true">◇</span><p>Generate a model to unlock<br>its properties and import options.</p></div>
+          <div id="modelCard" class="model-card" style="display:none">
+            <div class="ready-label"><span class="status-dot"></span>Generated asset</div>
+            <p id="modelMeta" class="model-meta"></p>
+            <div class="section-heading"><h3>Import setup</h3></div>
+            <div class="field"><label for="importHeight">Measured height <span>mm</span></label><input id="importHeight" type="number" min="0" max="1000000" value="0" step="any"><p class="help-text">0 keeps the generated size.</p></div>
+            <div class="field"><label for="importRotation">Vertical-axis rotation <span>degrees</span></label><input id="importRotation" type="number" min="-360" max="360" value="0" step="any"></div>
+            <div class="import-note"><span aria-hidden="true">i</span><p id="importHelp">Photo-based scale is estimated. Use a measured height to calibrate it.</p></div>
+          </div>
+          <details class="processing-panel" open>
+            <summary>Refine &amp; process</summary>
+            <p class="setting-guide">Each action creates a separate asset. Originals stay in Assets.</p>
+            <div class="field"><label for="processAction">Action</label><select id="processAction"><option value="texture">Regenerate textures</option><option value="smart_model">Smart segment model</option><option value="smart_image">Smart segment reference image</option><option value="segment">Segment for completion</option><option value="complete">Complete segmented parts</option></select></div>
+            <div id="processTextureFields">
+              <div class="field"><label for="processTextureModel">Texture engine</label><select id="processTextureModel"><option value="v3.5-20260815">v3.5 — Latest</option><option value="v3.0-20250812">v3.0 — Stable</option><option value="v2.5-20250123">v2.5 — Legacy</option></select></div>
+              <div class="field"><label for="processTextureQuality">Texture quality</label><select id="processTextureQuality"><option value="standard">Standard</option><option value="fast">Fast</option><option value="detailed">Detailed / HD</option><option value="extreme">Extreme / 8K</option></select></div>
+              <div class="field"><label for="processPrompt">Texture description (optional)</label><input id="processPrompt" type="text" maxlength="2000" placeholder="e.g. weathered bronze"></div>
+              <label class="process-check"><input type="checkbox" id="processReference"> Use current reference image instead of text</label>
+              <label class="process-check"><input type="checkbox" id="processPbr" checked> PBR materials</label>
+              <label class="process-check"><input type="checkbox" id="processDelight" checked> Remove reference lighting (v3.5)</label>
+              <div class="field"><label for="processSeed">Texture seed (optional)</label><input id="processSeed" type="number" min="0" max="2147483647" step="1"></div>
+            </div>
+            <div id="processSmartFields" hidden>
+              <div class="field"><label for="processGranularity">Part detail</label><select id="processGranularity"><option value="coarse">Coarse</option><option value="medium" selected>Medium</option><option value="fine">Fine</option></select></div>
+              <div class="field"><label for="processHint">Part hints (optional)</label><input id="processHint" type="text" maxlength="1000" placeholder="e.g. base, statue, pedestal"></div>
+            </div>
+            <div id="processCompleteFields" hidden>
+              <div class="field"><label for="processCompletionMode">Completion method</label><select id="processCompletionMode"><option value="ai_completion">AI — Fill missing geometry</option><option value="quick_cap">Quick cap — Seal open boundaries</option></select></div>
+              <div class="field"><label for="processParts">Part names (optional, one per line)</label><textarea id="processParts" rows="3" maxlength="5000" placeholder="Leave empty for all parts"></textarea></div>
+            </div>
+            <p id="processGuide" class="setting-guide" role="status"></p>
+            <p id="processCost" class="setting-guide" aria-live="polite"></p>
+            <button type="button" id="processBtn" class="primary-button" disabled>Run processing</button>
+            <p class="setting-guide">A separate SGAI credit charge is checked before each action. AI completion can invent missing details.</p>
+          </details>
+          <div class="placement-note"><span class="label">PLACEMENT</span><p>One component. At the origin.<br>Ready to move in SketchUp.</p></div>
+        </section>
+        <section id="assetsPanel" class="inspector-panel" role="tabpanel" aria-labelledby="inspectorAssetsTab" hidden><div class="inspector-heading"><span class="eyebrow">YOUR ASSETS</span><h2>Your creations.</h2><p>Select a completed model to preview, save or import.</p></div><div id="assetLibraryEmpty" class="library-empty"><span aria-hidden="true">▦</span><p>Your generated models<br>will collect here.</p></div><div id="assetLibrary" class="asset-library"></div><p class="library-note">Completed models are saved privately. Refresh Account to load saved assets.</p></section>
+      </aside>
+    </main>
+    <footer class="app-footer"><span id="hostVersion">SG 3D Engine</span><span>Closing this window stops local checks. Cloud tasks may continue.</span><span class="footer-signature">BUILT FOR SKETCHUP</span></footer>
+  </div>
+</body>
+</html>
