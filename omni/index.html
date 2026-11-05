@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="../js/site-config.js?v=18d41a019312"></script>
+  <script src="../js/ui-events.js?v=d536b74985a7"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://sketchupgurus-ai-server.onrender.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>SGAI Omni Video Studio</title>
+  <link rel="stylesheet" href="studio.css?v=a1037466398b">
+  <script src="assets/lucide.min.js?v=3411692820cb"></script>
+</head>
+<body>
+  <div id="app-container">
+    <header class="top-bar">
+      <div class="brand"><div class="brand-mark"><i data-lucide="box"></i></div><div><h1>SGAI <span>OMNI STUDIO</span></h1><p>ARCHITECTURAL VIDEO</p></div></div>
+      <div class="header-studio"><i data-lucide="clapperboard"></i><span>Video Studio</span><span class="header-divider"></span><span class="header-model">Gemini Omni 1.1</span></div>
+      <span class="header-model" id="omni-cost">Loading pricing...</span>
+    </header>
+    <div class="studio-layout">
+      <aside class="source-sidebar">
+        <div class="section-heading"><span><i data-lucide="layers"></i> SOURCE MATERIAL</span><button class="icon-btn" data-sg-click="action172" title="Sync SketchUp scenes" aria-label="Sync SketchUp scenes"><i data-lucide="refresh-cw"></i></button></div>
+        <nav class="mode-switcher" aria-label="Reference source">
+          <button class="tab-btn active" id="tab-scenes" data-sg-click="action173"><i data-lucide="film"></i>Scenes</button>
+          <button class="tab-btn" id="tab-screenshot" data-sg-click="action174"><i data-lucide="camera"></i>Viewport</button>
+          <button class="tab-btn" id="tab-images" data-sg-click="action175"><i data-lucide="images"></i>Images</button>
+        </nav>
+        <div class="view-container" id="scenes-panel">
+          <div class="image-heading"><label>Scene Sequence</label><span class="count" id="active-count">0 Active</span></div>
+          <ul class="scene-list" id="scenes-container"></ul>
+        </div>
+        <div class="view-container" id="screenshot-panel" style="display:none;">
+          <div class="image-heading"><label>Viewport Capture</label><span class="count">01</span></div>
+          <div class="screenshot-box">
+            <img id="shot-preview-img" class="screenshot-preview" alt="Captured SketchUp viewport">
+            <div id="shot-empty-msg" class="empty-state"><i data-lucide="scan"></i><span>No viewport captured</span></div>
+            <button class="btn capture-btn" data-sg-click="action176"><i data-lucide="camera"></i>Capture Viewport</button>
+          </div>
+        </div>
+        <div class="view-container" id="images-panel" style="display:none;">
+          <div class="image-heading"><label>Image Sequence</label><span class="count" id="image-count">0 / 8</span></div>
+          <button class="upload-btn" data-sg-click="action177"><i data-lucide="upload"></i><span>Add Images</span><small>PNG, JPG, WEBP</small></button>
+          <button class="btn-sm history-source-btn" id="btn-history-images" data-sg-click="action178"><i data-lucide="history"></i>From History</button>
+          <input id="image-files" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden data-sg-change="action179">
+          <ul class="scene-list" id="images-container"></ul>
+        </div>
+        <section class="motion-section">
+          <div class="section-heading"><span><i data-lucide="move-3d"></i> CAMERA MOTION</span></div>
+          <div class="preset-row">
+            <button class="preset-chip" data-sg-click="action180" title="Automatic camera path"><i data-lucide="wand-sparkles"></i>Auto</button>
+            <button class="preset-chip" data-sg-click="action181" title="Orbit clockwise"><i data-lucide="rotate-cw"></i>Orbit</button>
+            <button class="preset-chip" data-sg-click="action182" title="Dolly in"><i data-lucide="move-up-right"></i>Dolly</button>
+            <button class="preset-chip" data-sg-click="action183" title="Pan right"><i data-lucide="move-horizontal"></i>Pan</button>
+            <button class="preset-chip" data-sg-click="action184" title="Crane up"><i data-lucide="arrow-up"></i>Crane</button>
+            <button class="preset-chip" data-sg-click="action185" title="Forward glide"><i data-lucide="navigation"></i>Glide</button>
+          </div>
+        </section>
+        <div class="source-footer"><span class="connection-dot"></span><span id="connection-state">SketchUp</span><span class="source-footer-label">LOCAL STUDIO</span></div>
+      </aside>
+      <main class="workspace">
+        <section class="gallery-section">
+          <div class="section-heading"><span><i data-lucide="layout-grid"></i> ARCHITECTURAL PRESETS</span><div class="gallery-filters" aria-label="Preset category"><button id="filter-interior" class="filter-btn active" data-sg-click="action186">Interior</button><button id="filter-exterior" class="filter-btn" data-sg-click="action187">Exterior</button></div></div>
+          <div id="preset-gallery" class="preset-gallery"></div>
+        </section>
+        <section class="preview-section">
+          <div class="preview-heading"><div><span class="eyebrow">VIDEO WORKSPACE</span><h2>Preview</h2></div><div class="preview-tools"><select id="cloud-video-library" aria-label="Your saved cloud videos"><option value="">Your saved videos</option></select><span class="preview-state" id="preview-state">AWAITING INPUT</span><button class="icon-btn" data-sg-click="action188" title="Expand preview workspace" aria-label="Expand preview workspace"><i data-lucide="maximize-2"></i></button></div></div>
+          <div class="player-box" id="preview-stage">
+            <div class="view-corner corner-tl"></div><div class="view-corner corner-tr"></div><div class="view-corner corner-bl"></div><div class="view-corner corner-br"></div>
+            <img id="workspace-reference" alt="Selected reference image" style="display:none;">
+            <div id="player-empty" class="empty-state viewer-empty"><div class="viewer-icon"><i data-lucide="aperture"></i></div><strong>Awaiting reference</strong><span>SGAI OMNI STUDIO</span></div>
+            <video id="player-video" controls autoplay muted loop playsinline preload="metadata" data-sg-error="action189" style="display:none;"></video>
+          </div>
+          <div class="viewer-footer"><span><i data-lucide="ratio"></i><span id="preview-format">16:9 / 720p</span></span><span><i data-lucide="timer"></i><span id="preview-duration">10 seconds</span></span></div>
+        </section>
+        <section class="storyboard-section"><div class="section-heading"><span><i data-lucide="list-video"></i> STORYBOARD</span><span class="count" id="storyboard-count">0 FRAMES</span></div><div class="storyboard" id="storyboard"></div></section>
+      </main>
+      <aside class="settings-sidebar">
+        <div class="section-heading settings-title"><span><i data-lucide="sliders-horizontal"></i> GENERATION SETTINGS</span></div>
+        <div class="settings-scroll">
+          <section class="settings-section">
+            <label>AI Engine</label><div class="model-field"><div class="model-icon"><i data-lucide="sparkles"></i></div><div><strong>Gemini Omni 1.1 Flash</strong><span>VIDEO GENERATION</span></div><span class="model-dot"></span></div>
+          </section>
+          <section class="settings-section">
+            <div class="section-heading"><span>01 / VISUAL DIRECTION</span></div>
+            <label for="architecture-preset">Architectural Preset</label><select id="architecture-preset" data-sg-change="action190"><option value="">Custom Prompt</option></select>
+            <div class="prompt-heading"><label for="prompt-input">Design Prompt</label><button class="icon-btn" data-sg-click="action191" title="Clear prompt" aria-label="Clear prompt"><i data-lucide="eraser"></i></button></div>
+            <textarea id="prompt-input" maxlength="8000" data-sg-input="action192" placeholder="Describe the light, materials and atmosphere..."></textarea>
+          </section>
+          <section class="settings-section">
+            <div class="section-heading"><span>02 / OUTPUT</span></div>
+            <div class="settings-pair"><div><label for="aspect-ratio">Format</label><select id="aspect-ratio" data-sg-change="action193"><option value="16:9" selected>16:9 Landscape</option><option value="9:16">9:16 Portrait</option></select></div><div><label for="video-res">Resolution</label><select id="video-res" data-sg-change="action194"><option value="720p" selected>720p HD</option><option value="1080p">1080p FHD</option></select></div></div>
+            <label for="video-duration">Video Duration</label><select id="video-duration" data-sg-change="action195"><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10" selected>10 seconds</option></select>
+          </section>
+        </div>
+        <div class="generation-actions">
+          <button id="btn-generate" class="btn" data-sg-click="action196" disabled aria-describedby="generation-availability"><i data-lucide="sparkles"></i><span>Generate Video</span><i data-lucide="arrow-right"></i></button>
+          <p id="generation-availability" role="status" style="font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin:8px 0;color:var(--text-muted)">Checking video availability...</p>
+          <div class="export-actions"><button id="btn-export" class="btn-export" data-sg-click="action197" disabled><i data-lucide="download"></i>Export MP4</button><button id="btn-open-video" class="icon-btn" data-sg-click="action198" title="Open original video" aria-label="Open original video" disabled><i data-lucide="external-link"></i></button></div>
+        </div>
+      </aside>
+    </div>
+    <footer class="status-bar"><div class="status-message"><span class="status-dot"></span><span id="status-text" role="status" aria-live="polite">Ready</span></div><span id="version-text">OMNI FLASH 1.1 / STUDIO 1.3.1</span></footer>
+  </div>
+
+  <dialog id="history-picker" aria-labelledby="history-title">
+    <div class="history-picker-header"><h2 id="history-title">Saved Renders</h2><button class="icon-btn" id="history-close" title="Close history" aria-label="Close history"><i data-lucide="x"></i></button></div>
+    <div style="padding:12px 18px"><label for="history-source">Image source</label><select id="history-source"><option value="cloud">Cloud history</option><option value="device">This device</option></select><button id="history-retry" class="btn-sm" type="button">Refresh</button></div>
+    <div id="history-picker-grid" class="history-picker-grid"></div>
+    <p id="history-picker-status" role="status" aria-live="polite"></p>
+    <div class="history-picker-footer"><div class="history-pagination"><button class="icon-btn" id="history-prev" title="Previous page" aria-label="Previous page"><i data-lucide="chevron-left"></i></button><span id="history-page">1</span><button class="icon-btn" id="history-next" title="Next page" aria-label="Next page"><i data-lucide="chevron-right"></i></button></div><button class="btn" id="history-add" disabled><i data-lucide="plus"></i><span>Add Selected</span></button></div>
+  </dialog>
+  <script src="app.js?v=2ad98fc79a84"></script>
+  <script src="../js/account-session.js?v=894e711c58aa"></script>
+  <script src="server-client.js?v=dfb497646f4e"></script>
+  <script src="history-picker.js?v=1b7effff9a65"></script>
+</body>
+</html>
